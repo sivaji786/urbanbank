@@ -12,6 +12,7 @@ import {
 
 export function LatestEventsSection() {
   const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true); // Added loading state
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -27,6 +28,9 @@ export function LatestEventsSection() {
         setEvents(formattedEvents);
       } catch (error) {
         console.error('Failed to fetch events', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvents();

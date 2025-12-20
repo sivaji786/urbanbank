@@ -86,10 +86,10 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   ];
 
   const stats = [
-    { label: 'News Items', value: statsData.news.toString(), color: 'from-green-500 to-green-600' },
-    { label: 'Events', value: statsData.events.toString(), color: 'from-purple-500 to-purple-600' },
-    { label: 'Gallery Photos', value: statsData.gallery.toString(), color: 'from-blue-500 to-blue-600' },
-    { label: 'Downloads', value: statsData.downloads.toString(), color: 'from-orange-500 to-orange-600' },
+    { label: 'News Items', value: (statsData?.news ?? 0).toString(), color: 'from-green-500 to-green-600' },
+    { label: 'Events', value: (statsData?.events ?? 0).toString(), color: 'from-purple-500 to-purple-600' },
+    { label: 'Gallery Photos', value: (statsData?.gallery ?? 0).toString(), color: 'from-blue-500 to-blue-600' },
+    { label: 'Downloads', value: (statsData?.downloads ?? 0).toString(), color: 'from-orange-500 to-orange-600' },
   ];
 
   return (

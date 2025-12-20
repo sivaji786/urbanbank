@@ -31,6 +31,7 @@ export function NewsPage() {
             setNews(sorted);
         } catch (error) {
             console.error('Failed to fetch news', error);
+            setNews([]);
         } finally {
             setLoading(false);
         }
