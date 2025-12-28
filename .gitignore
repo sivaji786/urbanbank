@@ -27,6 +27,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+node_modules
+vendor
 # CodeIgniter
 api/writable/cache/*
 api/writable/logs/*
