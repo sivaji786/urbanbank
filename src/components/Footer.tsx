@@ -26,7 +26,6 @@ export function Footer() {
   const resources = [
     'Interest Rates',
     'Service Charges',
-    'EMI Calculator',
     'Downloads',
     'FAQs',
     'Privacy Policy',
@@ -45,9 +44,9 @@ export function Footer() {
               </p>
             </div>
             <div className="flex gap-2">
-              <Input 
-                type="email" 
-                placeholder="Enter your email address" 
+              <Input
+                type="email"
+                placeholder="Enter your email address"
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-11"
               />
               <Button className="bg-[#0099ff] hover:bg-[#0088ee] text-white h-11 px-6">

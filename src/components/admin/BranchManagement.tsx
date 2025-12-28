@@ -25,7 +25,7 @@ interface Branch {
     fax: string | null;
     timings: string;
     district: string;
-    is_headquarter: boolean | number;
+    is_headquarter: boolean | number | string;
 }
 
 type ViewState = 'list' | 'add' | 'edit';
@@ -151,7 +151,7 @@ export function BranchManagement() {
                                             <TableCell>
                                                 <div className="font-medium flex items-center gap-2">
                                                     {branch.name}
-                                                    {Boolean(branch.is_headquarter) && (
+                                                    {(branch.is_headquarter === 1 || branch.is_headquarter === '1' || branch.is_headquarter === true) && (
                                                         <span className="px-1.5 py-0.5 rounded text-[10px] bg-yellow-100 text-yellow-700 font-semibold border border-yellow-200 uppercase">
                                                             HQ
                                                         </span>

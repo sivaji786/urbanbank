@@ -7,7 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from './ui/carousel';
-import { EMICalculator } from './EMICalculator';
+
 
 const services = [
   {
@@ -117,8 +117,7 @@ export function BankingExcellenceSection() {
         </div>
       </div>
 
-      {/* EMI Calculator - Full Width Background */}
-      <EMICalculator />
+
     </section>
   );
 }

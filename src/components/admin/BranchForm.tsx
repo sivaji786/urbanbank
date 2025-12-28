@@ -19,7 +19,7 @@ interface Branch {
     fax: string | null;
     timings: string;
     district: string;
-    is_headquarter: boolean | number;
+    is_headquarter: boolean | number | string;
 }
 
 interface BranchFormProps {
@@ -29,9 +29,18 @@ interface BranchFormProps {
 }
 
 export function BranchForm({ branch, onBack, onSuccess }: BranchFormProps) {
-    const [currentBranch, setCurrentBranch] = useState<Partial<Branch>>(branch || {
-        timings: '10:00 AM - 6:00 PM',
-        is_headquarter: false
+    const [currentBranch, setCurrentBranch] = useState<Partial<Branch>>(() => {
+        if (branch) {
+            return {
+                ...branch,
+                // Convert is_headquarter to boolean for the toggle
+                is_headquarter: branch.is_headquarter === 1 || branch.is_headquarter === '1' || branch.is_headquarter === true
+            };
+        }
+        return {
+            timings: '10:00 AM - 6:00 PM',
+            is_headquarter: false
+        };
     });
     const [isSaving, setIsSaving] = useState(false);
 

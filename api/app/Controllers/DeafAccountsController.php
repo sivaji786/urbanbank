@@ -13,8 +13,8 @@ class DeafAccountsController extends ResourceController
     {
         $search = $this->request->getGet('search');
         if ($search) {
+            // Search only by name and UDRN (not address)
             $data = $this->model->like('name', $search)
-                                ->orLike('address', $search)
                                 ->orLike('udrn', $search)
                                 ->findAll();
         } else {
