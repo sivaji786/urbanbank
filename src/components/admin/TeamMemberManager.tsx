@@ -20,6 +20,7 @@ export function TeamMemberManager() {
                 { key: 'display_order', label: 'Display Order', type: 'text' },
             ]}
             layout="grid"
+            gridCols={6}
         />
     );
 }

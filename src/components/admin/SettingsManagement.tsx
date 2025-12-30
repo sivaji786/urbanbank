@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
   Settings,
-  Bell,
-  MessageSquare,
-  Send,
-  Flame,
-  Shield,
-  Mail,
-  Share2,
   Search,
   FileText,
   Map,
@@ -25,17 +18,11 @@ import { Switch } from '../ui/switch';
 import { Separator } from '../ui/separator';
 import { Card } from '../ui/card';
 import { toast } from 'sonner';
+import { useSettings } from '../../contexts/SettingsContext';
 import client from '../../api/client';
 
 type SettingsSection =
   | 'general'
-  | 'notifications'
-  | 'sms-gateway'
-  | 'whatsapp'
-  | 'firebase'
-  | 'security'
-  | 'mail'
-  | 'social'
   | 'seo'
   | 'robots'
   | 'sitemap'
@@ -43,6 +30,7 @@ type SettingsSection =
   | 'analytics';
 
 export function SettingsManagement() {
+  const { refreshSettings } = useSettings();
   const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   const [settings, setSettings] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +56,7 @@ export function SettingsManagement() {
     setIsLoading(true);
     try {
       await client.post('/settings', settings);
+      await refreshSettings();
       toast.success('Settings saved successfully!');
     } catch (error) {
       console.error('Failed to save settings', error);
@@ -81,24 +70,8 @@ export function SettingsManagement() {
     setSettings((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  const menuItems = [
-    { id: 'general' as SettingsSection, label: 'General', icon: Settings },
-    { id: 'notifications' as SettingsSection, label: 'Notifications', icon: Bell },
-    { id: 'sms-gateway' as SettingsSection, label: 'SMS Gateway', icon: MessageSquare },
-    { id: 'whatsapp' as SettingsSection, label: 'WhatsApp', icon: Send },
-    { id: 'firebase' as SettingsSection, label: 'Firebase', icon: Flame },
-    { id: 'security' as SettingsSection, label: 'Security', icon: Shield },
-    { id: 'mail' as SettingsSection, label: 'Mail', icon: Mail },
-    { id: 'social' as SettingsSection, label: 'Social', icon: Share2 },
-    { id: 'seo' as SettingsSection, label: 'SEO', icon: Search },
-    { id: 'robots' as SettingsSection, label: 'Robots', icon: FileText },
-    { id: 'sitemap' as SettingsSection, label: 'Sitemap', icon: Map },
-    { id: 'webmaster' as SettingsSection, label: 'Webmaster', icon: Globe },
-    { id: 'analytics' as SettingsSection, label: 'Analytics', icon: BarChart3 },
-  ];
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -114,20 +87,13 @@ export function SettingsManagement() {
       </div>
 
       {/* Settings Layout */}
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-4">
         {/* Settings Menu */}
         <div className="col-span-12 lg:col-span-3">
-          <Card className="p-4">
+          <Card className="p-3">
             <nav className="space-y-1">
               {[
                 { id: 'general' as SettingsSection, label: 'General', icon: Settings },
-                { id: 'notifications' as SettingsSection, label: 'Notifications', icon: Bell },
-                { id: 'sms-gateway' as SettingsSection, label: 'SMS Gateway', icon: MessageSquare },
-                { id: 'whatsapp' as SettingsSection, label: 'WhatsApp', icon: Send },
-                { id: 'firebase' as SettingsSection, label: 'Firebase', icon: Flame },
-                { id: 'security' as SettingsSection, label: 'Security', icon: Shield },
-                { id: 'mail' as SettingsSection, label: 'Mail', icon: Mail },
-                { id: 'social' as SettingsSection, label: 'Social', icon: Share2 },
                 { id: 'seo' as SettingsSection, label: 'SEO', icon: Search },
                 { id: 'robots' as SettingsSection, label: 'Robots', icon: FileText },
                 { id: 'sitemap' as SettingsSection, label: 'Sitemap', icon: Map },
@@ -157,7 +123,7 @@ export function SettingsManagement() {
 
         {/* Settings Content */}
         <div className="col-span-12 lg:col-span-9">
-          <Card className="p-6">
+          <Card className="p-5">
             {/* General Settings */}
             {activeSection === 'general' && (
               <div className="space-y-6">
@@ -179,19 +145,35 @@ export function SettingsManagement() {
                   </div>
 
                   <div>
-                    <Label htmlFor="site-tagline">Tagline</Label>
+                    <Label htmlFor="site_tagline">Tagline</Label>
                     <Input
-                      id="site-tagline"
-                      defaultValue="Banking Excellence Since 1981"
+                      id="site_tagline"
+                      value={settings.site_tagline || ''}
+                      onChange={(e) => updateSetting('site_tagline', e.target.value)}
+                      placeholder="e.g. Banking Excellence Since 1981"
                       className="mt-1.5"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="site-description">Site Description</Label>
+                    <Label htmlFor="domain_name">Domain Name</Label>
+                    <Input
+                      id="domain_name"
+                      value={settings.domain_name || ''}
+                      onChange={(e) => updateSetting('domain_name', e.target.value)}
+                      placeholder="e.g. https://guntururbanbank.org"
+                      className="mt-1.5"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">Full URL including https:// (used for Canonical and Sitemap)</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="site_description">Site Description</Label>
                     <Textarea
-                      id="site-description"
-                      defaultValue="Guntur Urban Co-operative Bank - Providing trusted banking services to our community."
+                      id="site_description"
+                      value={settings.site_description || ''}
+                      onChange={(e) => updateSetting('site_description', e.target.value)}
+                      placeholder="Describe your bank..."
                       rows={3}
                       className="mt-1.5"
                     />
@@ -242,7 +224,20 @@ export function SettingsManagement() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div>
+                    <Label htmlFor="visitor_count_offset">Visitor Count Offset</Label>
+                    <Input
+                      id="visitor_count_offset"
+                      type="number"
+                      value={settings.visitor_count_offset || 0}
+                      onChange={(e) => updateSetting('visitor_count_offset', parseInt(e.target.value) || 0)}
+                      placeholder="e.g. 125326"
+                      className="mt-1.5"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">This number will be added to actual site visits for the total count displayed in footer.</p>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="text-sm text-gray-900">Maintenance Mode</p>
                       <p className="text-xs text-gray-600">Temporarily disable the website</p>
@@ -250,602 +245,13 @@ export function SettingsManagement() {
                     <Switch />
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="text-sm text-gray-900">Registration</p>
                       <p className="text-xs text-gray-600">Allow new user registration</p>
                     </div>
                     <Switch defaultChecked />
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* Notifications Settings */}
-            {activeSection === 'notifications' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">Notification Settings</h3>
-                  <p className="text-sm text-gray-600">Configure notification preferences</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Email Notifications</p>
-                      <p className="text-xs text-gray-600">Receive email notifications</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">SMS Notifications</p>
-                      <p className="text-xs text-gray-600">Receive SMS alerts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Push Notifications</p>
-                      <p className="text-xs text-gray-600">Browser push notifications</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">WhatsApp Notifications</p>
-                      <p className="text-xs text-gray-600">Receive WhatsApp messages</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="notification-email">Notification Email</Label>
-                    <Input
-                      id="notification-email"
-                      type="email"
-                      placeholder="admin@guntururbanbank.org"
-                      className="mt-1.5"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* SMS Gateway Settings */}
-            {activeSection === 'sms-gateway' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">SMS Gateway Settings</h3>
-                  <p className="text-sm text-gray-600">Configure SMS service provider</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Enable SMS Gateway</p>
-                      <p className="text-xs text-gray-600">Activate SMS sending functionality</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="sms-provider">SMS Provider</Label>
-                    <select
-                      id="sms-provider"
-                      className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0099ff]"
-                    >
-                      <option>Twilio</option>
-                      <option>MSG91</option>
-                      <option>AWS SNS</option>
-                      <option>Nexmo</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="sms-api-key">API Key</Label>
-                    <Input
-                      id="sms-api-key"
-                      type="password"
-                      placeholder="Enter your API key"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="sms-api-secret">API Secret</Label>
-                    <Input
-                      id="sms-api-secret"
-                      type="password"
-                      placeholder="Enter your API secret"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="sms-sender-id">Sender ID</Label>
-                    <Input
-                      id="sms-sender-id"
-                      placeholder="GCUB"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex gap-3">
-                      <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-blue-900">Test SMS Configuration</p>
-                        <p className="text-xs text-blue-700 mt-1">Send a test SMS to verify your settings</p>
-                        <Button variant="outline" size="sm" className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100">
-                          Send Test SMS
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* WhatsApp Settings */}
-            {activeSection === 'whatsapp' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">WhatsApp Integration</h3>
-                  <p className="text-sm text-gray-600">Configure WhatsApp Business API</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Enable WhatsApp</p>
-                      <p className="text-xs text-gray-600">Activate WhatsApp messaging</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="whatsapp-api">WhatsApp Business API Key</Label>
-                    <Input
-                      id="whatsapp-api"
-                      type="password"
-                      placeholder="Enter your WhatsApp API key"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="whatsapp-phone">WhatsApp Business Number</Label>
-                    <Input
-                      id="whatsapp-phone"
-                      placeholder="+91 9876543210"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="whatsapp-webhook">Webhook URL</Label>
-                    <Input
-                      id="whatsapp-webhook"
-                      placeholder="https://yourdomain.com/webhook/whatsapp"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Auto Reply</p>
-                      <p className="text-xs text-gray-600">Send automated replies</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="whatsapp-message">Default Auto Reply Message</Label>
-                    <Textarea
-                      id="whatsapp-message"
-                      placeholder="Thank you for contacting Guntur Urban Bank. We will get back to you shortly."
-                      rows={3}
-                      className="mt-1.5"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Firebase Settings */}
-            {activeSection === 'firebase' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">Firebase Configuration</h3>
-                  <p className="text-sm text-gray-600">Connect to Firebase services</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Enable Firebase</p>
-                      <p className="text-xs text-gray-600">Activate Firebase integration</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="firebase-api-key">Firebase API Key</Label>
-                    <Input
-                      id="firebase-api-key"
-                      type="password"
-                      placeholder="AIzaSy..."
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="firebase-project-id">Project ID</Label>
-                    <Input
-                      id="firebase-project-id"
-                      placeholder="guntur-bank-app"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="firebase-sender-id">Messaging Sender ID</Label>
-                    <Input
-                      id="firebase-sender-id"
-                      placeholder="123456789012"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="firebase-app-id">App ID</Label>
-                    <Input
-                      id="firebase-app-id"
-                      placeholder="1:123456789012:web:abc123..."
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="firebase-measurement">Measurement ID (Analytics)</Label>
-                    <Input
-                      id="firebase-measurement"
-                      placeholder="G-XXXXXXXXXX"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Firebase Authentication</p>
-                      <p className="text-xs text-gray-600">Enable user authentication</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Cloud Firestore</p>
-                      <p className="text-xs text-gray-600">Enable database service</p>
-                    </div>
-                    <Switch />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Security Settings */}
-            {activeSection === 'security' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">Security Settings</h3>
-                  <p className="text-sm text-gray-600">Configure security and authentication</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Two-Factor Authentication</p>
-                      <p className="text-xs text-gray-600">Require 2FA for admin login</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Force HTTPS</p>
-                      <p className="text-xs text-gray-600">Redirect HTTP to HTTPS</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Login Attempts Limit</p>
-                      <p className="text-xs text-gray-600">Block after failed login attempts</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="max-login-attempts">Maximum Login Attempts</Label>
-                    <Input
-                      id="max-login-attempts"
-                      type="number"
-                      defaultValue="5"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
-                    <Input
-                      id="session-timeout"
-                      type="number"
-                      defaultValue="30"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">IP Whitelisting</p>
-                      <p className="text-xs text-gray-600">Restrict admin access by IP</p>
-                    </div>
-                    <Switch />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="allowed-ips">Allowed IP Addresses</Label>
-                    <Textarea
-                      id="allowed-ips"
-                      placeholder="192.168.1.1&#10;10.0.0.1"
-                      rows={3}
-                      className="mt-1.5"
-                    />
-                    <p className="text-xs text-gray-600 mt-1">One IP address per line</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Mail Settings */}
-            {activeSection === 'mail' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">Mail Configuration</h3>
-                  <p className="text-sm text-gray-600">Configure email delivery settings</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="mail-driver">Mail Driver</Label>
-                    <select
-                      id="mail-driver"
-                      className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0099ff]"
-                    >
-                      <option>SMTP</option>
-                      <option>SendGrid</option>
-                      <option>Mailgun</option>
-                      <option>AWS SES</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="smtp-host">SMTP Host</Label>
-                    <Input
-                      id="smtp-host"
-                      placeholder="smtp.gmail.com"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="smtp-port">SMTP Port</Label>
-                      <Input
-                        id="smtp-port"
-                        placeholder="587"
-                        className="mt-1.5"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="smtp-encryption">Encryption</Label>
-                      <select
-                        id="smtp-encryption"
-                        className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0099ff]"
-                      >
-                        <option>TLS</option>
-                        <option>SSL</option>
-                        <option>None</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="smtp-username">SMTP Username</Label>
-                    <Input
-                      id="smtp-username"
-                      placeholder="gcubhelpdesk@guntururbanbank.org"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="smtp-password">SMTP Password</Label>
-                    <Input
-                      id="smtp-password"
-                      type="password"
-                      placeholder="Enter password"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="mail-from-address">From Address</Label>
-                      <Input
-                        id="mail-from-address"
-                        type="email"
-                        placeholder="noreply@guntururbanbank.org"
-                        className="mt-1.5"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="mail-from-name">From Name</Label>
-                      <Input
-                        id="mail-from-name"
-                        placeholder="Guntur Urban Bank"
-                        className="mt-1.5"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex gap-3">
-                      <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-blue-900">Test Email Configuration</p>
-                        <p className="text-xs text-blue-700 mt-1">Send a test email to verify your settings</p>
-                        <Button variant="outline" size="sm" className="mt-3 border-blue-300 text-blue-700 hover:bg-blue-100">
-                          Send Test Email
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Social Settings */}
-            {activeSection === 'social' && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-gray-900 mb-1">Social Media Links</h3>
-                  <p className="text-sm text-gray-600">Configure social media profiles</p>
-                </div>
-                <Separator />
-
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="facebook">Facebook URL</Label>
-                    <Input
-                      id="facebook"
-                      placeholder="https://facebook.com/guntururbanbank"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="twitter">Twitter/X URL</Label>
-                    <Input
-                      id="twitter"
-                      placeholder="https://twitter.com/guntururbanbank"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="instagram">Instagram URL</Label>
-                    <Input
-                      id="instagram"
-                      placeholder="https://instagram.com/guntururbanbank"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="linkedin">LinkedIn URL</Label>
-                    <Input
-                      id="linkedin"
-                      placeholder="https://linkedin.com/company/guntururbanbank"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="youtube">YouTube URL</Label>
-                    <Input
-                      id="youtube"
-                      placeholder="https://youtube.com/@guntururbanbank"
-                      className="mt-1.5"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Show Social Icons</p>
-                      <p className="text-xs text-gray-600">Display social media icons in footer</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900">Open Graph Tags</p>
-                      <p className="text-xs text-gray-600">Enable social media preview cards</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-4">
-                  <Button onClick={handleSave} className="bg-[#0099ff] hover:bg-[#0088ee]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
                 </div>
               </div>
             )}
@@ -864,7 +270,9 @@ export function SettingsManagement() {
                     <Label htmlFor="meta-title">Meta Title</Label>
                     <Input
                       id="meta-title"
-                      defaultValue="Guntur Urban Co-operative Bank - Banking Excellence Since 1981"
+                      value={settings.meta_title || ''}
+                      onChange={(e) => updateSetting('meta_title', e.target.value)}
+                      placeholder="Guntur Urban Co-operative Bank - Banking Excellence Since 1981"
                       className="mt-1.5"
                     />
                     <p className="text-xs text-gray-600 mt-1">Recommended: 50-60 characters</p>
@@ -874,7 +282,9 @@ export function SettingsManagement() {
                     <Label htmlFor="meta-description">Meta Description</Label>
                     <Textarea
                       id="meta-description"
-                      defaultValue="Trusted banking services in Guntur. We offer savings accounts, loans, deposits, and more financial solutions for our community."
+                      value={settings.meta_description_seo || ''}
+                      onChange={(e) => updateSetting('meta_description_seo', e.target.value)}
+                      placeholder="Trusted banking services in Guntur. We offer savings accounts, loans, deposits, and more financial solutions for our community."
                       rows={3}
                       className="mt-1.5"
                     />
@@ -885,6 +295,8 @@ export function SettingsManagement() {
                     <Label htmlFor="meta-keywords">Meta Keywords</Label>
                     <Input
                       id="meta-keywords"
+                      value={settings.meta_keywords || ''}
+                      onChange={(e) => updateSetting('meta_keywords', e.target.value)}
                       placeholder="bank, cooperative bank, guntur, savings, loans"
                       className="mt-1.5"
                     />
@@ -895,6 +307,8 @@ export function SettingsManagement() {
                     <Label htmlFor="og-image">Open Graph Image URL</Label>
                     <Input
                       id="og-image"
+                      value={settings.og_image || ''}
+                      onChange={(e) => updateSetting('og_image', e.target.value)}
                       placeholder="https://guntururbanbank.org/og-image.jpg"
                       className="mt-1.5"
                     />
@@ -906,7 +320,10 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Auto-generate Sitemap</p>
                       <p className="text-xs text-gray-600">Automatically create XML sitemap</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.sitemap_auto === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('sitemap_auto', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -914,7 +331,10 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Canonical URLs</p>
                       <p className="text-xs text-gray-600">Add canonical link tags</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.canonical_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('canonical_enabled', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -922,7 +342,10 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Noindex, Nofollow</p>
                       <p className="text-xs text-gray-600">Prevent search engine indexing</p>
                     </div>
-                    <Switch />
+                    <Switch
+                      checked={settings.noindex_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('noindex_enabled', checked ? '1' : '0')}
+                    />
                   </div>
                 </div>
 
@@ -950,14 +373,18 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Enable Robots.txt</p>
                       <p className="text-xs text-gray-600">Generate robots.txt file</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.robots_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('robots_enabled', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="robots-content">Robots.txt Content</Label>
                     <Textarea
                       id="robots-content"
-                      defaultValue={`User-agent: *\nDisallow: /admin/\nDisallow: /private/\n\nSitemap: https://guntururbanbank.org/sitemap.xml`}
+                      value={settings.robots_content || `User-agent: *\nDisallow: /admin/\nDisallow: /private/\n\nSitemap: ${settings.domain_name || 'https://guntururbanbank.org'}/sitemap.xml`}
+                      onChange={(e) => updateSetting('robots_content', e.target.value)}
                       rows={10}
                       className="mt-1.5 font-mono text-sm"
                     />
@@ -996,16 +423,21 @@ export function SettingsManagement() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="text-sm text-gray-900">Auto-generate Sitemap</p>
+                      <p className="text-sm text-gray-900">Enable Sitemap</p>
                       <p className="text-xs text-gray-600">Automatically create and update sitemap</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.sitemap_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('sitemap_enabled', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="sitemap-frequency">Update Frequency</Label>
                     <select
                       id="sitemap-frequency"
+                      value={settings.sitemap_frequency || 'Weekly'}
+                      onChange={(e) => updateSetting('sitemap_frequency', e.target.value)}
                       className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0099ff]"
                     >
                       <option>Daily</option>
@@ -1018,13 +450,15 @@ export function SettingsManagement() {
                     <Label htmlFor="sitemap-priority">Default Priority</Label>
                     <select
                       id="sitemap-priority"
+                      value={settings.sitemap_priority || '0.5'}
+                      onChange={(e) => updateSetting('sitemap_priority', e.target.value)}
                       className="w-full mt-1.5 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0099ff]"
                     >
-                      <option>1.0 (Highest)</option>
-                      <option>0.8</option>
-                      <option>0.5 (Medium)</option>
-                      <option>0.3</option>
-                      <option>0.1 (Lowest)</option>
+                      <option value="1.0">1.0 (Highest)</option>
+                      <option value="0.8">0.8</option>
+                      <option value="0.5">0.5 (Medium)</option>
+                      <option value="0.3">0.3</option>
+                      <option value="0.1">0.1 (Lowest)</option>
                     </select>
                   </div>
 
@@ -1033,12 +467,18 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Include Images</p>
                       <p className="text-xs text-gray-600">Add image URLs to sitemap</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.sitemap_include_images === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('sitemap_include_images', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div>
-                    <Label>Exclude URLs (one per line)</Label>
+                    <Label htmlFor="sitemap-exclude">Exclude URLs (one per line)</Label>
                     <Textarea
+                      id="sitemap-exclude"
+                      value={settings.sitemap_exclude || ''}
+                      onChange={(e) => updateSetting('sitemap_exclude', e.target.value)}
                       placeholder="/admin&#10;/login&#10;/private"
                       rows={4}
                       className="mt-1.5"
@@ -1049,7 +489,7 @@ export function SettingsManagement() {
                     <div className="flex gap-3 items-start">
                       <div className="flex-1">
                         <p className="text-sm text-green-900">Current Sitemap</p>
-                        <p className="text-xs text-green-700 mt-1">https://guntururbanbank.org/sitemap.xml</p>
+                        <p className="text-xs text-green-700 mt-1">{settings.domain_name || 'https://guntururbanbank.org'}/sitemap.xml</p>
                       </div>
                       <Button variant="outline" size="sm" className="border-green-300 text-green-700 hover:bg-green-100">
                         Regenerate
@@ -1081,6 +521,8 @@ export function SettingsManagement() {
                     <Label htmlFor="google-verification">Google Search Console</Label>
                     <Input
                       id="google-verification"
+                      value={settings.google_verification || ''}
+                      onChange={(e) => updateSetting('google_verification', e.target.value)}
                       placeholder="Enter verification code"
                       className="mt-1.5"
                     />
@@ -1091,6 +533,8 @@ export function SettingsManagement() {
                     <Label htmlFor="bing-verification">Bing Webmaster Tools</Label>
                     <Input
                       id="bing-verification"
+                      value={settings.bing_verification || ''}
+                      onChange={(e) => updateSetting('bing_verification', e.target.value)}
                       placeholder="Enter verification code"
                       className="mt-1.5"
                     />
@@ -1100,6 +544,8 @@ export function SettingsManagement() {
                     <Label htmlFor="yandex-verification">Yandex Webmaster</Label>
                     <Input
                       id="yandex-verification"
+                      value={settings.yandex_verification || ''}
+                      onChange={(e) => updateSetting('yandex_verification', e.target.value)}
                       placeholder="Enter verification code"
                       className="mt-1.5"
                     />
@@ -1109,6 +555,8 @@ export function SettingsManagement() {
                     <Label htmlFor="pinterest-verification">Pinterest Verification</Label>
                     <Input
                       id="pinterest-verification"
+                      value={settings.pinterest_verification || ''}
+                      onChange={(e) => updateSetting('pinterest_verification', e.target.value)}
                       placeholder="Enter verification code"
                       className="mt-1.5"
                     />
@@ -1149,13 +597,18 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Enable Analytics</p>
                       <p className="text-xs text-gray-600">Track website visitors and behavior</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.analytics_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('analytics_enabled', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="ga-tracking">Google Analytics Tracking ID</Label>
                     <Input
                       id="ga-tracking"
+                      value={settings.ga_tracking_id || ''}
+                      onChange={(e) => updateSetting('ga_tracking_id', e.target.value)}
                       placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
                       className="mt-1.5"
                     />
@@ -1165,6 +618,8 @@ export function SettingsManagement() {
                     <Label htmlFor="gtm-id">Google Tag Manager ID</Label>
                     <Input
                       id="gtm-id"
+                      value={settings.gtm_id || ''}
+                      onChange={(e) => updateSetting('gtm_id', e.target.value)}
                       placeholder="GTM-XXXXXXX"
                       className="mt-1.5"
                     />
@@ -1174,6 +629,8 @@ export function SettingsManagement() {
                     <Label htmlFor="fb-pixel">Facebook Pixel ID</Label>
                     <Input
                       id="fb-pixel"
+                      value={settings.fb_pixel_id || ''}
+                      onChange={(e) => updateSetting('fb_pixel_id', e.target.value)}
                       placeholder="Enter Facebook Pixel ID"
                       className="mt-1.5"
                     />
@@ -1184,7 +641,10 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Cookie Consent</p>
                       <p className="text-xs text-gray-600">Show cookie consent banner</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.cookie_consent_enabled === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('cookie_consent_enabled', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -1192,13 +652,18 @@ export function SettingsManagement() {
                       <p className="text-sm text-gray-900">Anonymize IP</p>
                       <p className="text-xs text-gray-600">Anonymize visitor IP addresses</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch
+                      checked={settings.anonymize_ip === '1'}
+                      onCheckedChange={(checked: boolean) => updateSetting('anonymize_ip', checked ? '1' : '0')}
+                    />
                   </div>
 
                   <div>
                     <Label htmlFor="custom-scripts">Custom Tracking Scripts</Label>
                     <Textarea
                       id="custom-scripts"
+                      value={settings.custom_scripts || ''}
+                      onChange={(e) => updateSetting('custom_scripts', e.target.value)}
                       placeholder="<!-- Add custom analytics scripts here -->"
                       rows={6}
                       className="mt-1.5 font-mono text-sm"

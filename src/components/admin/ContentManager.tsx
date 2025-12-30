@@ -35,9 +35,10 @@ interface ContentManagerProps {
     columns: Column[];
     fields: Field[];
     layout?: 'list' | 'grid';
+    gridCols?: number;
 }
 
-export function ContentManager({ title, resource, columns, fields, layout = 'list' }: ContentManagerProps) {
+export function ContentManager({ title, resource, columns, fields, layout = 'list', gridCols = 4 }: ContentManagerProps) {
     const [items, setItems] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -45,6 +46,19 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
     const [currentImageField, setCurrentImageField] = useState<string | null>(null);
     const [currentItem, setCurrentItem] = useState<any>(null);
     const [formData, setFormData] = useState<any>({});
+
+    const getSingularTitle = () => {
+        // Remove " Management" and trailing "s" if possible
+        let t = title.replace(' Management', '').trim();
+        if (t.endsWith('s')) {
+            // Special cases
+            if (t === 'News') return 'News';
+            return t.slice(0, -1);
+        }
+        return t;
+    };
+
+    const singularTitle = getSingularTitle();
 
     useEffect(() => {
         fetchItems();
@@ -122,7 +136,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {view === 'list' ? (
                 <>
                     <div className="flex items-center justify-between">
@@ -137,7 +151,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                     </div>
 
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="p-4 border-b border-gray-100 flex items-center gap-4">
+                        <div className="p-3 border-b border-gray-100 flex items-center gap-4">
                             <div className="relative flex-1 max-w-sm">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <Input
@@ -150,7 +164,9 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                         </div>
 
                         {layout === 'grid' ? (
-                            <div className="p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            <div className={`p-3 grid gap-3 ${gridCols === 6
+                                ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+                                : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'}`}>
                                 {isLoading ? (
                                     <div className="col-span-full text-center py-12 text-gray-500">Loading...</div>
                                 ) : filteredItems.length === 0 ? (
@@ -233,7 +249,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                                             filteredItems.map((item, index) => (
                                                 <TableRow key={item.id || index} className="hover:bg-gray-50/50">
                                                     {columns.map((col) => (
-                                                        <TableCell key={col.key} className="py-3">
+                                                        <TableCell key={col.key} className="py-2">
                                                             {col.type === 'image' ? (
                                                                 <div className="w-10 h-10 rounded overflow-hidden bg-gray-100">
                                                                     <img
@@ -293,13 +309,13 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                 </>
             ) : view === 'image-selection' ? (
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex items-center gap-4 mb-4">
                         <Button variant="ghost" size="icon" onClick={() => setView('form')}>
                             <ArrowLeft className="w-4 h-4" />
                         </Button>
                         <h2 className="text-2xl font-bold text-gray-900">Select Image</h2>
                     </div>
-                    <Card className="p-6">
+                    <Card className="p-5">
                         <ImageSelector
                             onSelect={handleImageSelect}
                             onCancel={() => setView('form')}
@@ -308,17 +324,17 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                 </div>
             ) : (
                 <div className="max-w-2xl mx-auto">
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex items-center gap-4 mb-4">
                         <Button variant="ghost" size="icon" onClick={() => setView('list')}>
                             <ArrowLeft className="w-4 h-4" />
                         </Button>
                         <h2 className="text-2xl font-bold text-gray-900">
-                            {currentItem ? 'Edit Item' : 'Add New Item'}
+                            {currentItem ? `Edit ${singularTitle}` : `Add New ${singularTitle}`}
                         </h2>
                     </div>
 
-                    <Card className="p-6">
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                    <Card className="p-5">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             {fields.map((field) => (
                                 <div key={field.key}>
                                     <Label htmlFor={field.key} className="mb-2 block font-medium text-gray-700">{field.label}</Label>

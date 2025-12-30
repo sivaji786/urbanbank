@@ -1,6 +1,7 @@
-import { Phone, Mail, User, Menu, X, ChevronDown, ChevronRight, Clock } from 'lucide-react';
+import { Phone, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState, useEffect } from 'react';
+import { useSettings } from '../contexts/SettingsContext';
 import logo from 'figma:asset/6705fbbec794189a9f9b05c8b8f04e8469de538b.png';
 import { navigationMap, PageType } from '../utils/navigation';
 
@@ -22,48 +23,14 @@ const menuItems = [
   {
     label: 'Deposits',
     href: '#deposits',
-    submenu: [
-      { label: 'Saving Deposits', href: '#saving-deposits' },
-      { label: 'Current Deposits', href: '#current-deposits' },
-      { label: 'Deposit Insurance And Credit Guarantee Corporation', href: '#dicgc' },
-      { label: 'Fixed Deposits', href: '#fixed-deposits' },
-      { label: 'Deposit Rate Of Interests', href: '#deposit-rates' },
-      { label: 'New Gold Rate Of Interests', href: '#gold-rates' },
-      { label: 'Recurring Deposit', href: '#recurring-deposit' },
-      { label: 'Rate Of Interests - Bulk Institutions', href: '#bulk-rates' },
-    ],
   },
   {
     label: 'Loans & Advances',
     href: '#loans',
-    submenu: [
-      { label: 'Project Finance', href: '#project-finance' },
-      { label: 'MSME Loans', href: '#msme-loans' },
-      { label: 'Mortgage Loans', href: '#mortgage-loans' },
-      { label: 'Home Loan', href: '#home-loan' },
-      { label: 'Overdraft On Deposit Loans', href: '#overdraft-deposit' },
-      { label: 'Secured Overdraft', href: '#secured-overdraft' },
-      { label: 'Term Deposit Loans', href: '#term-deposit' },
-      { label: 'Loan And Advances Interest Rates', href: '#loan-rates' },
-      { label: 'Educational Loans', href: '#education-loans' },
-      { label: 'Urban Swagruha Loan - Housing Loan', href: '#swagruha-loan' },
-      { label: 'Interest Rates On Term Loans & Project Finance', href: '#term-loan-rates' },
-    ],
   },
   {
     label: 'Our Services',
     href: '#services',
-    submenu: [
-      { label: 'RTGS', href: '#rtgs' },
-      { label: 'NEFT', href: '#neft' },
-      { label: "DD's", href: '#dd' },
-      { label: 'Pay Orders', href: '#pay-orders' },
-      { label: 'Digital Banking/IMPS', href: '#digital-banking' },
-      { label: 'ATM Facility', href: '#atm' },
-      { label: 'Locker Facility', href: '#locker' },
-      { label: 'Customer Service Charges', href: '#service-charges' },
-      { label: 'Any Branch Banking (ABB)', href: '#abb' },
-    ],
   },
   {
     label: 'Gallery',
@@ -92,6 +59,7 @@ interface HeaderProps {
 }
 
 export function Header({ onNavigate }: HeaderProps) {
+  const { settings } = useSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -133,35 +101,43 @@ export function Header({ onNavigate }: HeaderProps) {
       {/* Top bar */}
       <div className="border-b border-gray-100">
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-14 gap-4">
+          <div className="flex items-center justify-between h-20 gap-4">
             {/* Logo */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <img src={logo} alt="Guntur Bank Logo" className="h-12 w-12 object-contain" />
+              <img src={logo} alt="THE GUNTUR CO-OPERATIVE URBAN BANK LIMITED" className="h-16 w-16 object-contain" />
               <div className="hidden sm:block">
-                <h1 className="text-base font-semibold text-gray-900 leading-tight">THE GUNTUR CO-OPERATIVE</h1>
-                <p className="text-sm font-medium text-gray-600">URBAN BANK LIMITED</p>
+                <h1
+                  className="font-black text-gray-900 tracking-tighter uppercase flex flex-col leading-[1.1]"
+                  style={{ fontFamily: '"Arial Black", Arial, sans-serif', fontWeight: 900 }}
+                >
+                  {(() => {
+                    const name = settings.site_name || 'THE GUNTUR CO-OPERATIVE URBAN BANK LIMITED';
+                    const splitIndex = name.toUpperCase().indexOf('URBAN BANK');
+                    if (splitIndex !== -1) {
+                      return (
+                        <>
+                          <span className="text-[0.6rem] lg:text-xs text-gray-600 block -mb-0.5">
+                            {name.substring(0, splitIndex).trim()}
+                          </span>
+                          <span className="text-lg lg:text-2xl block">
+                            {name.substring(splitIndex).trim()}
+                          </span>
+                        </>
+                      );
+                    }
+                    return <span className="text-xl lg:text-3xl">{name}</span>;
+                  })()}
+                </h1>
               </div>
             </div>
 
             {/* Contact Info */}
-            <div className="flex items-center gap-2 lg:gap-4 text-xs text-gray-600 flex-wrap justify-end">
-              <a href="mailto:gcubhelpdesk@guntururbanbank.org" className="flex items-center gap-1.5 hover:text-[#0099ff] transition-colors">
-                <Mail className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="hidden xl:inline">Support Email:</span>
-                <span className="hidden md:inline">gcubhelpdesk@guntururbanbank.org</span>
-                <span className="md:hidden">Support</span>
-              </a>
-              <div className="hidden sm:block w-px h-3 bg-gray-200"></div>
-              <a href="tel:1800-425-8873" className="flex items-center gap-1.5 hover:text-[#0099ff] transition-colors">
-                <Phone className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="hidden lg:inline">Toll Free:</span>
+            <div className="flex items-center gap-4 text-xs text-gray-600">
+              <a href="tel:1800-425-8873" className="flex items-center gap-2 hover:text-[#0099ff] transition-colors font-semibold">
+                <Phone className="h-4 w-4 text-[#0099ff]" />
+                <span className="hidden sm:inline">Toll Free:</span>
                 <span>1800-425-8873</span>
               </a>
-              <div className="hidden lg:block w-px h-3 bg-gray-200"></div>
-              <div className="hidden lg:flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>10:00 AM to 6:00 PM</span>
-              </div>
             </div>
           </div>
         </div>

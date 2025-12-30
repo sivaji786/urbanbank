@@ -15,6 +15,7 @@ class ContactController extends ResourceController
             'name' => 'required|min_length[3]',
             'email' => 'required|valid_email',
             'subject' => 'required|min_length[3]',
+            'category' => 'required',
             'message' => 'required|min_length[10]',
         ];
 
@@ -33,7 +34,7 @@ class ContactController extends ResourceController
         $email->setFrom($data->email, $data->name);
         $email->setTo($recipientEmail);
         $email->setSubject('Contact Form: ' . $data->subject);
-        $email->setMessage("Name: {$data->name}\nEmail: {$data->email}\n\nMessage:\n{$data->message}");
+        $email->setMessage("Name: {$data->name}\nEmail: {$data->email}\nCategory: {$data->category}\n\nMessage:\n{$data->message}");
 
         // In a real environment, uncomment this:
         // if ($email->send()) {

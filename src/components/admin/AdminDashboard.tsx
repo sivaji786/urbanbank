@@ -30,9 +30,12 @@ import DeafAccountsManagement from './DeafAccountsManagement';
 import { ProductManagement } from './ProductManagement';
 
 import { BranchManagement } from './BranchManagement';
+import { ServicesManagement } from './ServicesManagement';
+import { ServiceChargesManagement } from './ServiceChargesManagement';
+import { VisitorAnalytics } from './VisitorAnalytics';
 import client from '../../api/client';
 
-type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans';
+type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans' | 'services' | 'service-charges' | 'visitor-analytics';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -68,6 +71,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   const menuItems = [
     { id: 'overview' as AdminView, label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'visitor-analytics' as AdminView, label: 'Visitor Analytics', icon: TrendingUp },
     { id: 'branches' as AdminView, label: 'Branch Locator', icon: MapPin },
     { id: 'pages' as AdminView, label: 'Pages Content', icon: FileText },
     { id: 'team-members' as AdminView, label: 'Team Members', icon: Users },
@@ -83,6 +87,11 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const productSubMenuItems = [
     { id: 'deposits' as AdminView, label: 'Deposits', icon: Layout },
     { id: 'loans' as AdminView, label: 'Loans', icon: Layout },
+  ];
+
+  const serviceSubMenuItems = [
+    { id: 'services' as AdminView, label: 'Services', icon: Layout },
+    { id: 'service-charges' as AdminView, label: 'Service Charges', icon: Layout },
   ];
 
   const stats = [
@@ -146,12 +155,12 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   setCurrentView(item.id);
                   if (window.innerWidth < 1024) setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all ${isActive
                   ? 'bg-[#0099ff] text-white shadow-md'
                   : 'text-gray-700 hover:bg-gray-100'
                   }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-4 w-4" />
                 <span className="flex-1 text-left">{item.label}</span>
                 {isActive && <ChevronRight className="h-4 w-4" />}
               </button>
@@ -173,12 +182,40 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     setCurrentView(item.id);
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 pl-8 rounded-lg transition-all ${isActive
+                  className={`w-full flex items-center gap-3 px-3 py-2 pl-8 text-sm rounded-lg transition-all ${isActive
                     ? 'bg-[#0099ff] text-white shadow-md'
                     : 'text-gray-700 hover:bg-gray-100'
                     }`}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-4 w-4" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {isActive && <ChevronRight className="h-4 w-4" />}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Services Submenu */}
+          <div className="pt-2">
+            <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Our Services
+            </div>
+            {serviceSubMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setCurrentView(item.id);
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 pl-8 text-sm rounded-lg transition-all ${isActive
+                    ? 'bg-[#0099ff] text-white shadow-md'
+                    : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                  <Icon className="h-4 w-4" />
                   <span className="flex-1 text-left">{item.label}</span>
                   {isActive && <ChevronRight className="h-4 w-4" />}
                 </button>
@@ -198,11 +235,11 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
         className={`pt-16 transition-all duration-300 ${sidebarOpen ? 'lg:pl-64' : ''
           }`}
       >
-        <div className="p-6">
+        <div className="p-4">
           {currentView === 'overview' && (
             <>
               {/* Welcome Section */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <h2 className="text-gray-900 mb-2">Welcome back, Administrator</h2>
                 <p className="text-gray-600">
                   Manage your bank's website content from this dashboard
@@ -210,11 +247,11 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {stats.map((stat, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                    className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div
                       className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4`}
@@ -228,7 +265,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
                 <h3 className="text-gray-900 mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {menuItems.slice(1, -1).map((item) => {
@@ -237,7 +274,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                       <button
                         key={item.id}
                         onClick={() => setCurrentView(item.id)}
-                        className="flex flex-col items-center gap-3 p-6 border-2 border-gray-200 rounded-lg hover:border-[#0099ff] hover:bg-[#0099ff]/5 transition-all group"
+                        className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-[#0099ff] hover:bg-[#0099ff]/5 transition-all group"
                       >
                         <div className="w-12 h-12 rounded-lg bg-gray-100 group-hover:bg-[#0099ff]/10 flex items-center justify-center transition-colors">
                           <Icon className="h-6 w-6 text-gray-600 group-hover:text-[#0099ff] transition-colors" />
@@ -317,6 +354,9 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
           {currentView === 'branches' && <BranchManagement />}
           {currentView === 'deposits' && <ProductManagement category="deposit" />}
           {currentView === 'loans' && <ProductManagement category="loan" />}
+          {currentView === 'services' && <ServicesManagement />}
+          {currentView === 'service-charges' && <ServiceChargesManagement />}
+          {currentView === 'visitor-analytics' && <VisitorAnalytics />}
         </div>
       </main>
     </div>

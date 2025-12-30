@@ -96,12 +96,8 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
     };
 
     const handleApplyNow = () => {
+        sessionStorage.setItem('pendingApplyId', id);
         window.location.hash = `#${category === 'deposit' ? 'deposits' : 'loans'}`;
-        // Trigger the apply flow after navigation
-        setTimeout(() => {
-            const event = new CustomEvent('applyForProduct', { detail: { productId: id } });
-            window.dispatchEvent(event);
-        }, 100);
     };
 
     if (isLoading) {
@@ -139,7 +135,7 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
     return (
         <div className="min-h-screen bg-gray-50 pt-[104px]">
             {/* Hero Section */}
-            <div className={`bg-gradient-to-r ${isLoan ? 'from-blue-900 to-[#0099ff]' : 'from-[#0099ff] to-[#0077cc]'} text-white py-16 relative overflow-hidden`}>
+            <div className="bg-gradient-to-r from-[#0099ff] to-[#0077cc] text-white py-16 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                 <div className="max-w-[1400px] mx-auto px-6 relative z-10">
                     <Button
@@ -150,25 +146,29 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </Button>
-                    <div className="flex items-center gap-6 mb-6">
-                        <div className={`p-6 ${isLoan ? 'bg-blue-50' : 'bg-white/20'} rounded-3xl`}>
-                            <Icon className={`w-16 h-16 ${isLoan ? 'text-[#0099ff]' : 'text-white'}`} />
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                        <div className="flex items-center gap-6">
+                            <div className="p-6 bg-white/20 rounded-3xl backdrop-blur-sm border border-white/10">
+                                <Icon className="w-16 h-16 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-4xl lg:text-6xl font-black mb-3 leading-tight animate-in slide-in-from-left duration-700">
+                                    {product.title}
+                                </h1>
+                                <p className="text-xl text-white/90 font-medium">
+                                    {product.description}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-4xl lg:text-6xl font-black mb-3 leading-tight animate-in slide-in-from-left duration-700">
-                                {product.title}
-                            </h1>
-                            <p className="text-xl text-white/90 font-medium">
-                                {product.description}
-                            </p>
-                        </div>
-                    </div>
-                    <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30">
-                        <TrendingUp className="w-6 h-6" />
-                        <div>
-                            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Interest Rate</p>
-                            <p className="text-2xl font-black">{product.summary_rate}</p>
-                        </div>
+                        {!isLoan && (
+                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shrink-0">
+                                <TrendingUp className="w-6 h-6" />
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider opacity-80">Interest Rate</p>
+                                    <p className="text-2xl font-black">{product.summary_rate}</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -182,9 +182,9 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {product.features.map((feature, idx) => (
-                            <div key={idx} className="flex items-start gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#0099ff]/30 transition-colors group">
+                            <div key={idx} className="flex items-start gap-4 p-2 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#0099ff]/30 transition-colors group">
                                 <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-[#0099ff] transition-colors shrink-0">
-                                    <CheckCircle2 className="w-5 h-5 text-[#0099ff] group-hover:text-white" />
+                                    <CheckCircle2 className="w-5 h-5 text-[#0099ff] group-hover:text-gray" />
                                 </div>
                                 <p className="text-gray-700 font-bold text-base leading-relaxed">{feature}</p>
                             </div>
@@ -193,42 +193,44 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                 </div>
 
                 {/* Interest Rate Table */}
-                {product.rates && product.rates.length > 0 && (
+                {product.rates && product.rates.length > 0 && !isLoan && (
                     <div className="bg-white rounded-[4rem] shadow-2xl border border-gray-100 overflow-hidden mb-12 animate-in slide-in-from-bottom-8 duration-700">
-                        <div className="grid grid-cols-1 lg:grid-cols-3">
-                            <div className={`${isLoan ? 'bg-gray-900' : 'bg-gradient-to-br from-[#0099ff] to-[#0077cc]'} p-12 lg:p-16 text-white flex flex-col justify-center relative`}>
+                        <div className="flex flex-col">
+                            <div className={`${isLoan ? 'bg-gray-900' : 'bg-gradient-to-br from-[#0099ff] to-[#0077cc]'} p-12 lg:p-16 text-white relative`}>
                                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                                <div className="relative z-10">
-                                    <div className="inline-block px-4 py-1.5 bg-white/20 text-white text-xs font-black uppercase tracking-[0.3em] rounded-full mb-6">
-                                        Competitive Rates
+                                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-12">
+                                    <div className="max-w-2xl">
+                                        <div className="inline-block px-4 py-1.5 bg-white/20 text-white text-xs font-black uppercase tracking-[0.3em] rounded-full mb-6">
+                                            Competitive Rates
+                                        </div>
+                                        <h2 className="text-3xl lg:text-4xl font-black mb-6 leading-tight">
+                                            Interest Rate<br />
+                                            <span className={isLoan ? 'text-[#0099ff]' : 'text-white/80'}>Structure</span>
+                                        </h2>
+                                        <p className="text-gray-300 mb-0 text-base leading-relaxed font-medium">
+                                            {isLoan
+                                                ? 'Flexible repayment tenures and quick approvals tailored for your financial needs.'
+                                                : 'Competitive rates with quarterly interest credits. Higher rates for senior citizens.'}
+                                        </p>
                                     </div>
-                                    <h2 className="text-3xl lg:text-4xl font-black mb-6 leading-tight">
-                                        Interest Rate<br />
-                                        <span className={isLoan ? 'text-[#0099ff]' : 'text-white/80'}>Structure</span>
-                                    </h2>
-                                    <p className="text-gray-300 mb-10 text-base leading-relaxed font-medium">
-                                        {isLoan
-                                            ? 'Flexible repayment tenures and quick approvals tailored for your financial needs.'
-                                            : 'Competitive rates with quarterly interest credits. Higher rates for senior citizens.'}
-                                    </p>
-                                    <div className="space-y-5">
-                                        <div className="flex items-center gap-4 p-5 bg-white/5 rounded-2xl border border-white/10">
-                                            <div className="w-12 h-12 bg-[#0099ff]/20 rounded-xl flex items-center justify-center">
-                                                <Clock className="w-6 h-6 text-[#0099ff]" />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:min-w-[450px]">
+                                        <div className="flex items-center gap-4 p-4 bg-white/20 rounded-2xl border border-white/10">
+                                            <div className="w-12 h-12 bg-[#0099ff]/10 rounded-xl flex items-center justify-center">
+                                                <Clock className="w-6 h-6 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+                                                <p className="text-xs font-black text-white/80 uppercase tracking-widest mb-1">
                                                     {isLoan ? 'Processing Time' : 'Interest Credit'}
                                                 </p>
                                                 <p className="text-lg font-bold">{isLoan ? '48 Working Hours*' : 'Quarterly'}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4 p-5 bg-white/5 rounded-2xl border border-white/10">
-                                            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                                                <ShieldCheck className="w-6 h-6 text-green-500" />
+                                        <div className="flex items-center gap-4 p-5 bg-white/20 rounded-2xl border border-white/10">
+                                            <div className="w-12 h-12 bg-[#0099ff]/10 rounded-xl flex items-center justify-center">
+                                                <ShieldCheck className="w-6 h-6 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+                                                <p className="text-xs font-black text-white/80 uppercase tracking-widest mb-1">
                                                     {isLoan ? 'Prepayment' : 'Insurance'}
                                                 </p>
                                                 <p className="text-lg font-bold">{isLoan ? 'Nil Charges*' : 'DICGC Covered'}</p>
@@ -237,15 +239,15 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="lg:col-span-2 p-12 lg:p-16 bg-white">
-                                <div className="overflow-x-auto rounded-[2rem] border border-gray-100 shadow-inner">
-                                    <table className="w-full min-w-[500px]">
+                            <div className="p-8 lg:p-16 bg-white">
+                                <div className="overflow-x-auto rounded-[2rem] border border-gray-100 shadow-inner mb-4 rounded-2xl">
+                                    <table className="w-full min-w-[500px] border-collapse">
                                         <thead>
                                             <tr className="bg-gray-50/50">
                                                 {product.rate_headers.map((header, hIdx) => (
                                                     <th
                                                         key={hIdx}
-                                                        className={`py-6 px-8 text-xs font-black text-gray-400 uppercase tracking-[0.2em] border-b-2 border-gray-100 ${hIdx === 0 ? 'text-left' : 'text-center'
+                                                        className={`py-4 px-8 text-xs font-black text-gray-900 uppercase tracking-[0.2em] border-b-2 border-gray-100 ${hIdx === 0 ? 'text-left' : 'text-center'
                                                             }`}
                                                     >
                                                         {header}
@@ -253,15 +255,15 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                                                 ))}
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-50">
+                                        <tbody className="divide-y divide-gray-900">
                                             {product.rates.map((rate, rIdx) => (
                                                 <tr key={rIdx} className="hover:bg-blue-50/30 transition-all duration-300">
                                                     {rate.row_data.map((val, vIdx) => (
                                                         <td
                                                             key={vIdx}
-                                                            className={`py-6 px-8 text-gray-800 ${vIdx === 0
-                                                                    ? 'text-base font-bold text-gray-900'
-                                                                    : 'text-center text-lg font-black'
+                                                            className={`py-3 border-b px-8 text-gray-800 ${vIdx === 0
+                                                                ? 'text-base font-bold text-gray-900'
+                                                                : 'text-center text-md font-black'
                                                                 } ${vIdx > 0 && vIdx === product.rate_headers.length - 1 ? 'text-[#0099ff]' : ''
                                                                 }`}
                                                         >
@@ -288,9 +290,9 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                 )}
 
                 {/* CTA Section */}
-                <div className="bg-gradient-to-r from-blue-900 to-[#0099ff] rounded-[3rem] p-12 md:p-16 text-white text-center shadow-2xl">
-                    <h2 className="text-3xl md:text-4xl font-black mb-4">Ready to Get Started?</h2>
-                    <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                <div className="bg-[#0099ff]/10 rounded-[3rem] p-12 md:p-16 text-white text-center shadow-2xl">
+                    <h2 className="text-3xl text-[#0099ff] md:text-4xl font-black mb-4">Ready to Get Started?</h2>
+                    <p className="text-xl text-gray-900 mb-8 max-w-2xl mx-auto">
                         {isLoan
                             ? 'Apply now and our loan experts will contact you within 24 hours to guide you through the process.'
                             : 'Open your account today and start earning competitive interest on your savings.'}
@@ -298,14 +300,14 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Button
                             onClick={handleApplyNow}
-                            className="bg-white text-[#0099ff] hover:bg-gray-100 h-16 px-10 rounded-2xl font-black text-xl shadow-xl"
+                            className="bg-[#0099ff] text-white hover:bg-white/20 h-10 px-4 rounded-2xl font-black text-md shadow-xl"
                         >
                             Apply Now
                         </Button>
                         <Button
                             onClick={handleBack}
                             variant="outline"
-                            className="border-white/30 text-white hover:bg-white/10 h-16 px-10 rounded-2xl font-black text-xl"
+                            className="border-white/30 text-gray-900 hover:bg-white/10 h-10 px-4 rounded-2xl font-black text-md shadow-xl"
                         >
                             <ArrowLeft className="w-5 h-5 mr-2" />
                             View All {isLoan ? 'Loans' : 'Deposits'}

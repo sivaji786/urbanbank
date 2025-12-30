@@ -25,12 +25,19 @@ import { NewsPage } from './components/NewsPage';
 import { NewsDetailsPage } from './components/NewsDetailsPage';
 import { ProductDetailPage } from './components/ProductDetailPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 import { useState, useEffect } from 'react';
-import { getPageFromHash, PageType } from './utils/navigation';
+import { getPageFromHash } from './utils/navigation';
 import { Toaster } from 'sonner';
+import { useVisitorTracking } from './hooks/useVisitorTracking';
+import { SEO } from './components/SEO';
+import { useSettings } from './contexts/SettingsContext';
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Track visitor on app mount
+  useVisitorTracking();
 
   const [currentPage, setCurrentPage] = useState<string>(() => {
     const hash = window.location.hash;
@@ -109,6 +116,61 @@ function AppContent() {
     }
   }, [isAuthenticated, currentPage, isLoading]);
 
+  const { settings } = useSettings();
+
+  const getPageSEO = () => {
+    const siteName = settings.site_name || 'Guntur Urban Bank';
+
+    // Base Schema
+    const baseFinancialSchema = {
+      "@context": "https://schema.org",
+      "@type": "FinancialService",
+      "name": siteName,
+      "description": settings.site_description,
+      "url": settings.domain_name || window.location.origin,
+      "telephone": settings.support_phone || "1800-425-8873",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Guntur",
+        "addressRegion": "Andhra Pradesh",
+        "postalCode": "522001",
+        "addressCountry": "IN"
+      }
+    };
+
+    if (currentPage === 'home') {
+      return {
+        title: 'Home',
+        description: `Welcome to ${siteName}. Providing premium banking services, low-interest loans, and secure deposits for seven decades.`,
+        schema: baseFinancialSchema
+      };
+    }
+    if (currentPage === 'about-us') {
+      return {
+        title: 'About Us',
+        description: `Learn about the history and heritage of ${siteName}, a premiere co-operative bank in Andhra Pradesh.`,
+      };
+    }
+    if (currentPage === 'contact') {
+      return {
+        title: 'Contact Us',
+        description: `Get in touch with ${siteName}. Reach out via phone, email, or visit our branches across Guntur.`,
+        schema: {
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          "mainEntity": baseFinancialSchema
+        }
+      };
+    }
+    // Default fallback
+    return {
+      title: currentPage.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      description: settings.site_description
+    };
+  };
+
+  const seoData = getPageSEO();
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -122,7 +184,12 @@ function AppContent() {
   }
 
   if (currentPage === 'login') {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <>
+        <SEO title="Admin Login" description="Secure access to the Urban Bank Administration Panel." />
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      </>
+    );
   }
 
   // Check for dynamic routes
@@ -130,6 +197,7 @@ function AppContent() {
     const id = currentPage.split('/')[1];
     return (
       <div className="min-h-screen bg-white">
+        <SEO title="News & Events" />
         <Header onNavigate={(page) => setCurrentPage(page)} />
         <main className="pt-[104px]">
           <NewsDetailsPage id={id} />
@@ -143,6 +211,7 @@ function AppContent() {
     const id = currentPage.split('/')[1];
     return (
       <div className="min-h-screen bg-white">
+        <SEO title="Deposit Product Details" />
         <Header onNavigate={(page) => setCurrentPage(page)} />
         <main>
           <ProductDetailPage id={id} category="deposit" />
@@ -156,6 +225,7 @@ function AppContent() {
     const id = currentPage.split('/')[1];
     return (
       <div className="min-h-screen bg-white">
+        <SEO title="Loan Product Details" />
         <Header onNavigate={(page) => setCurrentPage(page)} />
         <main>
           <ProductDetailPage id={id} category="loan" />
@@ -167,6 +237,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEO {...seoData} />
       <Header onNavigate={(page) => setCurrentPage(page)} />
       <main>
         {currentPage === 'home' ? (
@@ -240,9 +311,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Toaster position="top-right" richColors />
-      <AppContent />
-    </AuthProvider>
+    <SettingsProvider>
+      <AuthProvider>
+        <Toaster position="top-right" richColors />
+        <AppContent />
+      </AuthProvider>
+    </SettingsProvider>
   );
 }

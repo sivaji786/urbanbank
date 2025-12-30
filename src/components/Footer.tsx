@@ -3,8 +3,72 @@ import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import logo from 'figma:asset/6705fbbec794189a9f9b05c8b8f04e8469de538b.png';
+import { useState, useEffect, useRef } from 'react';
+import { useSettings } from '../contexts/SettingsContext';
+import client from '../api/client';
 
 export function Footer() {
+  const { settings } = useSettings();
+  const [totalVisits, setTotalVisits] = useState<number>(0);
+  const [displayedVisits, setDisplayedVisits] = useState<number>(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const counterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchVisitorStats = async () => {
+      try {
+        const response = await client.get('/visitor-stats');
+        setTotalVisits(response.data.total_visits || 0);
+      } catch (error) {
+        console.debug('Failed to fetch visitor stats:', error);
+      }
+    };
+
+    fetchVisitorStats();
+  }, []);
+
+  // Intersection Observer to trigger animation when footer is visible
+  useEffect(() => {
+    if (!counterRef.current || hasAnimated || totalVisits === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+            animateCounter();
+          }
+        });
+      },
+      { threshold: 0.5 } // Trigger when 50% of the element is visible
+    );
+
+    observer.observe(counterRef.current);
+
+    return () => {
+      if (counterRef.current) {
+        observer.unobserve(counterRef.current);
+      }
+    };
+  }, [totalVisits, hasAnimated]);
+
+  const animateCounter = () => {
+    const duration = 2000; // 2 seconds
+    const steps = 60; // 60 frames
+    const increment = totalVisits / steps;
+    let currentStep = 0;
+
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setDisplayedVisits(totalVisits);
+        clearInterval(timer);
+      } else {
+        setDisplayedVisits(Math.floor(increment * currentStep));
+      }
+    }, duration / steps);
+  };
+
   const quickLinks = [
     'About Us',
     'Board of Directors',
@@ -64,16 +128,16 @@ export function Footer() {
           {/* Brand */}
           <div className="lg:col-span-4">
             <div className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="Guntur Bank Logo" className="h-12 w-12" />
+              <img src={logo} alt={`${settings.site_name} Logo`} className="h-12 w-12" />
               <div>
-                <h3 className="text-base">Guntur Bank</h3>
-                <p className="text-xs text-gray-400">Since 1948</p>
+                <h3 className="text-base uppercase">{settings.site_name}</h3>
+                <p className="text-xs text-gray-400">{settings.site_tagline}</p>
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-4">
-              A premiere co-operative bank serving Andhra Pradesh with excellence and integrity for over seven decades.
+              {settings.site_description}
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-4">
               {[Facebook, Twitter, Instagram, Linkedin].map((Icon, index) => (
                 <a
                   key={index}
@@ -83,6 +147,21 @@ export function Footer() {
                   <Icon className="h-4 w-4" />
                 </a>
               ))}
+            </div>
+            {/* Total Visits Counter with Digit Boxes */}
+            <div ref={counterRef} className="flex items-center gap-2">
+              <span className="text-sm text-gray-400">This site has</span>
+              <div className="flex gap-1">
+                {displayedVisits.toString().split('').map((digit, index) => (
+                  <div
+                    key={index}
+                    className="w-8 h-10 bg-gray-900 border border-white/20 rounded flex items-center justify-center transition-all duration-300"
+                  >
+                    <span className="text-white text-lg font-bold">{digit}</span>
+                  </div>
+                ))}
+              </div>
+              <span className="text-sm text-gray-400">page visits</span>
             </div>
           </div>
 
@@ -166,11 +245,17 @@ export function Footer() {
         <Separator className="bg-white/10 mb-6" />
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-400">
-          <p>© 2025 The Guntur Co-operative Urban Bank Limited. All rights reserved.</p>
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-3 text-center md:text-left">
+            <p>© {new Date().getFullYear()} {settings.site_name}. All rights reserved.</p>
+            <span className="hidden md:inline text-gray-700">|</span>
+            <p className="text-xs md:text-sm">
+              Developed by <a href="https://www.digitalks.in" target="_blank" rel="noopener noreferrer" className="text-[#0099ff] hover:text-white transition-colors font-medium">DIGI TALKS INDIA</a>
+            </p>
+          </div>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Sitemap</a>
+            <a href="/api/index.php/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sitemap</a>
           </div>
         </div>
       </div>

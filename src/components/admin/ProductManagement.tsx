@@ -225,19 +225,21 @@ export function ProductManagement({ category }: ProductManagementProps) {
     if (view === 'add' || view === 'edit') {
         return (
             <div className="space-y-6 animate-in fade-in duration-500">
-                <div className="flex items-center gap-4 border-b border-gray-200 pb-6">
+                <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
                     <Button variant="outline" size="icon" onClick={handleBackToList} className="rounded-full h-10 w-10 border-gray-300 hover:bg-gray-100">
                         <ArrowLeft className="h-5 w-5 text-gray-600" />
                     </Button>
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{view === 'edit' ? 'Edit Product' : 'Add New Product'}</h2>
+                        <h2 className="text-2xl font-bold text-gray-900">
+                            {view === 'edit' ? `Edit ${formData.title}` : `Add New ${category === 'deposit' ? 'Deposit' : 'Loan'}`}
+                        </h2>
                         <p className="text-gray-500 text-sm">Configure {formData.category} details and features</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
+                <form onSubmit={handleSubmit} className="space-y-5 max-w-5xl mx-auto">
                     {/* Basic Info Card */}
-                    <Card className="p-8 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
+                    <Card className="p-5 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-2 bg-blue-50 rounded-lg">
                                 <Receipt className="w-5 h-5 text-[#0099ff]" />
@@ -245,7 +247,7 @@ export function ProductManagement({ category }: ProductManagementProps) {
                             <h3 className="text-lg font-bold text-gray-900">Basic Information</h3>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-200 pb-4">
                             <div className="space-y-6">
                                 <div className="grid gap-2">
                                     <Label htmlFor="title" className="text-gray-700 font-semibold">Product Title</Label>
@@ -300,10 +302,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                 </div>
                             </div>
                         </div>
-                    </Card>
 
-                    {/* Features Card */}
-                    <Card className="p-8 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
+                        {/* Features Card */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-50 rounded-lg">
@@ -316,7 +316,7 @@ export function ProductManagement({ category }: ProductManagementProps) {
                             </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-200 pb-4">
                             {formData.features.map((feature, idx) => (
                                 <div key={idx} className="flex gap-2 group">
                                     <div className="h-10 w-10 bg-gray-50 rounded-lg flex items-center justify-center text-sm font-bold text-gray-400 shrink-0">
@@ -341,10 +341,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                 </div>
                             ))}
                         </div>
-                    </Card>
 
-                    {/* Rate Card Table */}
-                    <Card className="p-8 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
+                        {/* Rate Card Table */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-amber-50 rounded-lg">
@@ -371,21 +369,21 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                     <tr className="bg-gray-100/50 border-b border-gray-200">
                                         {formData.rate_headers.map((header, colIdx) => (
                                             <th key={colIdx} className="p-3 min-w-[200px]">
-                                                <div className="flex gap-2">
+                                                <div className="flex items-center gap-2">
                                                     <Input
                                                         value={header}
                                                         onChange={e => updateHeader(colIdx, e.target.value)}
-                                                        className="h-9 font-bold border-gray-300 bg-white"
+                                                        className="h-9 font-bold border-gray-300 bg-white flex-1"
                                                     />
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-9 w-9 text-gray-400 hover:text-red-500 shrink-0"
+                                                        className="h-8 w-8 text-gray-400 hover:text-red-500 shrink-0"
                                                         onClick={() => removeHeader(colIdx)}
                                                         disabled={formData.rate_headers.length === 1}
                                                     >
-                                                        <X className="h-3 w-3" />
+                                                        <X className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </th>
@@ -423,33 +421,34 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                 </tbody>
                             </table>
                         </div>
-                    </Card>
 
-                    <div className="flex justify-end gap-4 pt-6 pb-20">
-                        <Button type="button" variant="outline" onClick={handleBackToList} disabled={submitting} className="h-12 px-8 rounded-xl font-medium text-gray-600">
-                            Cancel
-                        </Button>
-                        <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc] h-12 px-8 rounded-xl font-bold text-lg shadow-xl shadow-blue-500/20" disabled={submitting}>
-                            {submitting ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin mr-2" /> Saving...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-5 h-5 mr-2" /> Save Product
-                                </>
-                            )}
-                        </Button>
-                    </div>
+
+                        <div className="flex justify-end gap-4 pt-6 pb-20">
+                            <Button type="button" variant="outline" onClick={handleBackToList} disabled={submitting} className="h-10 px-8 rounded-xl font-medium text-gray-600">
+                                Cancel
+                            </Button>
+                            <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc] h-10 px-8 rounded-xl font-bold text-md shadow-xl shadow-blue-500/20" disabled={submitting}>
+                                {submitting ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save className="w-5 h-5 mr-2" /> Save Product
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </Card>
                 </form>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-5 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-1">
-                <div>
+                <div className="flex-1 min-w-0">
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight">{category === 'deposit' ? 'Deposits' : 'Loans'}</h2>
                     <p className="text-gray-500 mt-1 text-lg">Manage {category === 'deposit' ? 'deposit' : 'loan'} products and interest rates</p>
                 </div>
@@ -480,7 +479,7 @@ export function ProductManagement({ category }: ProductManagementProps) {
                     <p className="text-gray-400 font-medium">Loading products...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {products.length === 0 ? (
                         <div className="text-center py-32 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -494,8 +493,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
                         </div>
                     ) : (
                         products.map((product) => (
-                            <Card key={product.id} className="p-8 hover:shadow-xl transition-all duration-300 border-gray-100 rounded-[2rem] group bg-white">
-                                <div className="flex flex-col md:flex-row gap-8">
+                            <Card key={product.id} className="p-6 hover:shadow-2xl transition-all duration-300 border-gray-100 rounded-2xl group bg-white flex flex-col h-full">
+                                <div className="flex flex-col flex-1 min-w-0">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-4 mb-4">
                                             <div className="p-3 bg-[#0099ff]/10 rounded-2xl group-hover:bg-[#0099ff] transition-colors duration-300">
@@ -515,7 +514,7 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                         </div>
                                         <p className="text-gray-600 text-base mb-6 leading-relaxed max-w-2xl">{product.description}</p>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 p-6 bg-gray-50 rounded-3xl border border-gray-100">
+                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-3xl border border-gray-100">
                                             <div>
                                                 <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                                                     <List className="w-3 h-3" /> Key Features
@@ -543,11 +542,11 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                         </div>
                                     </div>
 
-                                    <div className="flex md:flex-col gap-3 justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-6 md:pt-0 md:pl-8">
-                                        <Button variant="outline" onClick={() => handleEdit(product)} className="h-12 w-full md:w-32 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-bold text-gray-700">
+                                    <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
+                                        <Button variant="outline" onClick={() => handleEdit(product)} className="h-11 flex-1 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-bold text-gray-700">
                                             Edit
                                         </Button>
-                                        <Button variant="ghost" onClick={() => handleDelete(product.id!)} className="h-12 w-full md:w-32 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 font-bold">
+                                        <Button variant="ghost" onClick={() => handleDelete(product.id!)} className="h-11 flex-1 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 font-bold">
                                             Delete
                                         </Button>
                                     </div>

@@ -1,135 +1,90 @@
-import { ArrowRightLeft, CreditCard, Lock, Smartphone, FileText, Building2, Zap, Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Building2, Shield, Smartphone, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
+import client from '../api/client';
+import * as Icons from 'lucide-react';
 
-const services = [
-  {
-    icon: ArrowRightLeft,
-    title: 'RTGS - Real Time Gross Settlement',
-    description: 'Transfer large amounts instantly and securely across banks in real-time.',
-    features: [
-      'Minimum amount: ₹2 Lakhs',
-      'No maximum limit',
-      'Real-time settlement',
-      'Available during bank hours'
-    ],
-    charges: '₹25 + GST per transaction',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-  {
-    icon: Zap,
-    title: 'NEFT - National Electronic Funds Transfer',
-    description: 'Fast and secure electronic fund transfer available 24x7 throughout the year.',
-    features: [
-      'No minimum limit',
-      'No maximum limit',
-      'Available 24x7',
-      'Settlement in batches'
-    ],
-    charges: 'Up to ₹10,000: ₹2.50 + GST | Above: ₹5 + GST',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-  },
-  {
-    icon: FileText,
-    title: 'Demand Drafts',
-    description: 'Safe and secure payment instrument for local and outstation payments.',
-    features: [
-      'Accepted nationwide',
-      'Valid for 3 months',
-      'Cancelation facility available',
-      'Safe alternative to cash'
-    ],
-    charges: '₹50 + GST per DD',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-  },
-  {
-    icon: FileText,
-    title: 'Pay Orders',
-    description: 'Instant payment guarantee for local transactions.',
-    features: [
-      'Instant issuance',
-      'Local clearing only',
-      'Valid for 3 months',
-      'Cancelation available'
-    ],
-    charges: '₹40 + GST per Pay Order',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-  },
-  {
-    icon: Smartphone,
-    title: 'Digital Banking / IMPS',
-    description: 'Transfer money instantly 24x7 using mobile or internet banking.',
-    features: [
-      'Instant transfer 24x7',
-      'Mobile & internet banking',
-      'Up to ₹2 Lakhs per transaction',
-      'Secure with OTP verification'
-    ],
-    charges: 'Up to ₹1,000: ₹2 + GST | Above: ₹5 + GST',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-  },
-  {
-    icon: CreditCard,
-    title: 'ATM / Debit Card Facility',
-    description: 'Access your account 24x7 with our RuPay debit card.',
-    features: [
-      'Free withdrawals at our ATMs',
-      'POS & online payments',
-      'Insurance coverage',
-      'EMV chip security'
-    ],
-    charges: 'Annual Fee: ₹100 + GST',
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-  },
-  {
-    icon: Lock,
-    title: 'Locker Facility',
-    description: 'Secure storage for your valuables with advanced security.',
-    features: [
-      'Multiple size options',
-      'Fire & theft protection',
-      'Insurance coverage available',
-      'CCTV surveillance'
-    ],
-    charges: 'Starting from ₹1,500/year',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-  },
-  {
-    icon: Building2,
-    title: 'Any Branch Banking (ABB)',
-    description: 'Access your account from any of our branches across the network.',
-    features: [
-      'All 13 branches enabled',
-      'Deposit & withdrawal',
-      'Account statement',
-      'No additional charges'
-    ],
-    charges: 'Free for all customers',
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50',
-  },
-];
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  features: string[];
+  charges: string;
+  color: string;
+  bg_color: string;
+  status: string;
+}
 
-const serviceCharges = [
-  { service: 'Cheque Book (10 leaves)', charge: 'Free' },
-  { service: 'Cheque Book (25 leaves)', charge: '₹50 + GST' },
-  { service: 'Account Statement (Email)', charge: 'Free' },
-  { service: 'Account Statement (Physical)', charge: '₹20 + GST' },
-  { service: 'Duplicate Passbook', charge: '₹50 + GST' },
-  { service: 'Cheque Return Charges', charge: '₹300 + GST' },
-  { service: 'Stop Payment Request', charge: '₹100 + GST' },
-  { service: 'Balance Enquiry (SMS)', charge: 'Free' },
-  { service: 'NACH / ECS Mandate', charge: '₹100 + GST' },
-  { service: 'Account Closure', charge: '₹500 + GST' },
-];
+interface ServiceCharge {
+  id: number;
+  service: string;
+  charge: string;
+  status: string;
+}
+
+// Helper function to get icon component by name
+const getIconComponent = (iconName: string) => {
+  const IconComponent = (Icons as any)[iconName];
+  return IconComponent || Icons.FileText; // Fallback to FileText if icon not found
+};
 
 export function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [serviceCharges, setServiceCharges] = useState<ServiceCharge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [servicesRes, chargesRes] = await Promise.all([
+          client.get('/services'),
+          client.get('/service-charges')
+        ]);
+
+        // Filter only active services and charges
+        setServices(servicesRes.data.filter((s: Service) => s.status === 'active'));
+        setServiceCharges(chargesRes.data.filter((c: ServiceCharge) => c.status === 'active'));
+      } catch (err) {
+        console.error('Failed to fetch services data:', err);
+        setError('Failed to load services. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-[#0099ff] mx-auto mb-4" />
+          <p className="text-gray-600">Loading services...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Services</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()} className="bg-[#0099ff] hover:bg-[#0077cc]">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -145,32 +100,35 @@ export function ServicesPage() {
       {/* Services Grid */}
       <div className="max-w-[1400px] mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {services.map((service, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#0099ff]/30"
-            >
-              <div className={`p-3 ${service.bgColor} rounded-lg inline-block mb-4`}>
-                <service.icon className={`w-8 h-8 ${service.color}`} />
-              </div>
-              <h3 className="text-lg text-gray-900 mb-2">{service.title}</h3>
-              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-              
-              <ul className="space-y-2 mb-4">
-                {service.features.map((feature, featureIdx) => (
-                  <li key={featureIdx} className="flex items-start gap-2 text-xs text-gray-700">
-                    <span className="text-[#0099ff] mt-0.5">✓</span>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+          {services.map((service) => {
+            const IconComponent = getIconComponent(service.icon);
+            return (
+              <div
+                key={service.id}
+                className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-[#0099ff]/30"
+              >
+                <div className={`p-3 ${service.bg_color} rounded-lg inline-block mb-4`}>
+                  <IconComponent className={`w-8 h-8 ${service.color}`} />
+                </div>
+                <h3 className="text-lg text-gray-900 mb-2">{service.title}</h3>
+                <p className="text-sm text-gray-600 mb-4">{service.description}</p>
 
-              <div className="pt-4 mt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-1">Service Charges</p>
-                <p className="text-sm text-gray-900">{service.charges}</p>
+                <ul className="space-y-2 mb-4">
+                  {service.features.map((feature, featureIdx) => (
+                    <li key={featureIdx} className="flex items-start gap-2 text-xs text-gray-700">
+                      <span className="text-[#0099ff] mt-0.5">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="pt-4 mt-4 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-1">Service Charges</p>
+                  <p className="text-sm text-gray-900">{service.charges}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Service Charges Table */}
@@ -179,7 +137,7 @@ export function ServicesPage() {
           <p className="text-sm text-gray-600 mb-6">
             Effective from January 1, 2024 | *All charges are subject to applicable GST
           </p>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -189,8 +147,8 @@ export function ServicesPage() {
                 </tr>
               </thead>
               <tbody>
-                {serviceCharges.map((charge, idx) => (
-                  <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50">
+                {serviceCharges.map((charge) => (
+                  <tr key={charge.id} className="border-b border-gray-200 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-900">{charge.service}</td>
                     <td className="py-3 px-4 text-right text-sm text-gray-900">{charge.charge}</td>
                   </tr>
@@ -256,6 +214,52 @@ export function ServicesPage() {
           </div>
         </div>
       </div>
+
+      {/* Map or Additional Info Section */}
+      <section className="py-12 bg-white border-t border-gray-200">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8">
+            <h2 className="text-gray-900 mb-2">Visit Our Branches</h2>
+            <p className="text-gray-600">
+              We have 13 branches across Andhra Pradesh ready to serve you
+            </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl p-8 border border-gray-200">
+            <div className="grid md:grid-cols-3 gap-6 text-center">
+              <div>
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <Building2 className="w-8 h-8 text-[#0099ff]" />
+                </div>
+                <h3 className="text-gray-900 mb-2">13 Branches</h3>
+                <p className="text-gray-600 text-sm">
+                  Serving customers across Guntur, Krishna, and Prakasam districts
+                </p>
+              </div>
+
+              <div>
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <Shield className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-gray-900 mb-2">Extended Hours</h3>
+                <p className="text-gray-600 text-sm">
+                  Open 6 days a week with convenient timings to serve you better
+                </p>
+              </div>
+
+              <div>
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                  <Smartphone className="w-8 h-8 text-purple-600" />
+                </div>
+                <h3 className="text-gray-900 mb-2">24/7 Support</h3>
+                <p className="text-gray-600 text-sm">
+                  Toll-free helpline available round the clock for your convenience
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

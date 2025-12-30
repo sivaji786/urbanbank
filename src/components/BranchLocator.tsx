@@ -173,13 +173,20 @@ export function BranchLocator() {
                       </div>
 
                       {/* Details Grid */}
-                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 text-sm items-start">
                         {/* Address */}
-                        <div className="sm:col-span-2 flex items-start gap-2">
+                        <div className="sm:col-span-2 lg:col-span-2 flex items-start gap-2">
                           <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                           <div>
                             <p className="text-xs text-gray-500 mb-0.5">Address</p>
-                            <p className="text-xs text-gray-700 leading-relaxed">{branch.address}</p>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.address + ' ' + branch.name)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-gray-700 leading-relaxed hover:text-[#0099ff] hover:underline decoration-dotted transition-colors"
+                            >
+                              {branch.address}
+                            </a>
                           </div>
                         </div>
 
@@ -198,17 +205,30 @@ export function BranchLocator() {
                         </div>
 
                         {/* Email */}
-                        <div className="flex items-start gap-2">
+                        <div className="flex items-start gap-2 min-w-0">
                           <Mail className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
                           <div className="min-w-0">
                             <p className="text-xs text-gray-500 mb-0.5">Email</p>
                             <a
                               href={`mailto:${branch.email}`}
-                              className="text-xs text-gray-700 hover:text-purple-600 break-all block"
+                              className="text-xs text-gray-700 hover:text-purple-600 truncate block"
                             >
                               {branch.email}
                             </a>
                           </div>
+                        </div>
+
+                        {/* Map Action */}
+                        <div className="sm:col-span-2 lg:col-span-1 flex items-center lg:justify-end pt-2 lg:pt-0">
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.address + ' ' + branch.name)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#0099ff] hover:bg-[#0088ee] text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-blue-500/10 active:scale-95 whitespace-nowrap"
+                          >
+                            <MapPin className="w-3.5 h-3.5" />
+                            View on Map
+                          </a>
                         </div>
                       </div>
 

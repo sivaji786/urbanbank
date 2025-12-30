@@ -3,6 +3,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -15,6 +16,7 @@ export function ContactPage() {
     email: '',
     phone: '',
     subject: '',
+    category: '',
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +38,7 @@ export function ContactPage() {
         email: '',
         phone: '',
         subject: '',
+        category: '',
         message: ''
       });
     } catch (error) {
@@ -86,6 +89,27 @@ export function ContactPage() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="category" className="text-sm text-gray-700 mb-1.5 block">
+                    Request Type <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value: string) => setFormData(prev => ({ ...prev, category: value }))}
+                    required
+                  >
+                    <SelectTrigger className="h-11 bg-gray-50 border-gray-200">
+                      <SelectValue placeholder="Select type of request" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="General Enquiry">General Enquiry</SelectItem>
+                      <SelectItem value="Fraud Complaint">Fraud Complaint</SelectItem>
+                      <SelectItem value="Lodge a Complaint">Lodge a Complaint</SelectItem>
+                      <SelectItem value="Feed Back">Feed Back</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div>
                   <Label htmlFor="name" className="text-sm text-gray-700 mb-1.5 block">
                     Full Name <span className="text-red-500">*</span>
