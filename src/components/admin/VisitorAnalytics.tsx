@@ -51,11 +51,34 @@ export function VisitorAnalytics() {
         setError(null);
         try {
             const response = await client.get(`/visitor-logs?page=${page}&limit=20`);
-            setLogs(response.data.data);
-            setTotalPages(response.data.pagination.pages);
+
+            console.log('Visitor logs API response:', response.data); // Debug log
+
+            // Handle different response structures
+            if (Array.isArray(response.data)) {
+                // API returns array directly
+                setLogs(response.data);
+                setTotalPages(1);
+            } else if (response.data && response.data.data) {
+                // API returns wrapped data
+                setLogs(response.data.data);
+
+                if (response.data.pagination && response.data.pagination.pages) {
+                    setTotalPages(response.data.pagination.pages);
+                } else {
+                    setTotalPages(1);
+                }
+            } else {
+                // Unexpected structure
+                console.warn('Unexpected API response:', response.data);
+                setLogs([]);
+                setTotalPages(1);
+            }
         } catch (err) {
             console.error('Failed to fetch visitor logs:', err);
             setError('Failed to load visitor logs');
+            setLogs([]);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }

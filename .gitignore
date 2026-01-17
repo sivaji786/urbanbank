@@ -39,3 +39,8 @@ api/writable/uploads/*
 # Uploads
 api/public/uploads/*
 !api/public/uploads/.gitkeep
+
+# Deployment packages
+*.zip
+.env.production
+.env.development
