@@ -44,3 +44,8 @@ api/public/uploads/*
 *.zip
 .env.production
 .env.development
+
+# Documentation (Private)
+developer_documents/
+sales_documents/
+
