@@ -31,6 +31,7 @@ interface Product {
     rate_headers: string[];
     rates: RateRow[];
     status: 'active' | 'inactive';
+    image_url?: string;
 }
 
 type ViewState = 'list' | 'add' | 'edit';
@@ -61,6 +62,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
     });
 
     const [submitting, setSubmitting] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
         fetchProducts();
@@ -96,6 +99,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
             rates: [{ row_data: ['', '', ''] }],
             status: 'active'
         });
+        setSelectedImage(null);
+        setImagePreview(null);
         setView('add');
         window.scrollTo(0, 0);
     };
@@ -110,6 +115,8 @@ export function ProductManagement({ category }: ProductManagementProps) {
             rate_headers: (item.rate_headers && item.rate_headers.length > 0) ? item.rate_headers : ['Header'],
             rates: (item.rates && item.rates.length > 0) ? item.rates : [{ row_data: Array(item.rate_headers?.length || 1).fill('') }]
         });
+        setSelectedImage(null);
+        setImagePreview(item.image_url || null);
         setView('edit');
         window.scrollTo(0, 0);
     };
@@ -135,33 +142,63 @@ export function ProductManagement({ category }: ProductManagementProps) {
         }
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setSelectedImage(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
         setError(null);
 
         // Filter out empty features or rate rows
-        const cleanedData = {
-            ...formData,
-            features: formData.features.filter(f => f.trim() !== ''),
-            rates: formData.rates.map(r => ({
-                ...r,
-                row_data: r.row_data.map(val => val.trim())
-            })).filter(r => r.row_data.some(val => val !== ''))
-        };
+        const cleanedFeatures = formData.features.filter(f => f.trim() !== '');
+        const cleanedRates = formData.rates.map(r => ({
+            ...r,
+            row_data: r.row_data.map(val => val.trim())
+        })).filter(r => r.row_data.some(val => val !== ''));
+
+        const data = new FormData();
+        data.append('category', formData.category);
+        data.append('title', formData.title);
+        data.append('description', formData.description);
+        data.append('icon', formData.icon);
+        data.append('summary_rate', formData.summary_rate);
+        data.append('status', formData.status);
+        data.append('features', JSON.stringify(cleanedFeatures));
+        data.append('rate_headers', JSON.stringify(formData.rate_headers));
+        data.append('rates', JSON.stringify(cleanedRates));
+
+        if (selectedImage) {
+            data.append('image', selectedImage);
+        }
 
         try {
             if (editingItem?.id) {
-                await client.put(`/products/${editingItem.id}`, cleanedData);
+                // Use POST for updates when uploading files (CodeIgniter handles multipart better with POST)
+                await client.post(`/products/${editingItem.id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 setSuccess('Product updated successfully.');
             } else {
-                await client.post('/products', cleanedData);
+                await client.post('products', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 setSuccess('Product added successfully.');
             }
             setView('list');
             fetchProducts();
             window.scrollTo(0, 0);
         } catch (err) {
+            console.error('Submit error:', err);
             setError('Failed to save product. Please check your inputs.');
         } finally {
             setSubmitting(false);
@@ -270,6 +307,38 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                         rows={4}
                                         className="rounded-xl resize-none"
                                     />
+                                </div>
+                                <div className="grid gap-2 pt-2">
+                                    <Label className="text-gray-700 font-semibold">Product Image</Label>
+                                    <div className="flex flex-col gap-4">
+                                        {imagePreview && (
+                                            <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    className="absolute top-2 right-2 rounded-full h-8 w-8 shadow-lg"
+                                                    onClick={() => {
+                                                        setSelectedImage(null);
+                                                        setImagePreview(null);
+                                                    }}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center justify-center w-full">
+                                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-colors ${imagePreview ? 'border-gray-200' : 'border-blue-200 bg-blue-50/30'}`}>
+                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <Layout className="w-8 h-8 text-blue-500 mb-2 opacity-60" />
+                                                    <p className="text-sm text-gray-600 font-medium">Click to upload or drag and drop</p>
+                                                    <p className="text-xs text-gray-400 mt-1">PNG, JPG or WEBP (Max 2MB)</p>
+                                                </div>
+                                                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -497,8 +566,12 @@ export function ProductManagement({ category }: ProductManagementProps) {
                                 <div className="flex flex-col flex-1 min-w-0">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-4 mb-4">
-                                            <div className="p-3 bg-[#0099ff]/10 rounded-2xl group-hover:bg-[#0099ff] transition-colors duration-300">
-                                                <Layout className="w-8 h-8 text-[#0099ff] group-hover:text-white transition-colors" />
+                                            <div className="p-3 bg-[#0099ff]/10 rounded-2xl group-hover:bg-[#0099ff] transition-colors duration-300 overflow-hidden flex items-center justify-center w-14 h-14 shrink-0">
+                                                {product.image_url ? (
+                                                    <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Layout className="w-8 h-8 text-[#0099ff] group-hover:text-white transition-colors" />
+                                                )}
                                             </div>
                                             <div>
                                                 <h3 className="text-2xl font-black text-gray-900 leading-tight">{product.title}</h3>

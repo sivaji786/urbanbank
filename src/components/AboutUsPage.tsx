@@ -39,7 +39,7 @@ export function AboutUsPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await client.get('/pages/about-us');
+        const response = await client.get('pages/about-us');
         if (response.data && response.data.content) {
           // The content might be a string (if double encoded) or object. 
           // Our controller ensures it returns object if possible, but let's be safe.

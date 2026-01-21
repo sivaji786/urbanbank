@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Wallet, TrendingUp, PiggyBank, RefreshCw, Building2, Coins, Loader2, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
+import { Wallet, TrendingUp, PiggyBank, RefreshCw, Building2, Coins, Loader2, ArrowLeft, Send, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
 import client from '../api/client';
+import { Captcha } from './ui/Captcha';
 
 const iconMap: any = {
   Wallet,
@@ -14,6 +15,12 @@ const iconMap: any = {
   Building2,
   Coins
 };
+
+interface Branch {
+  id: number;
+  name: string;
+  district: string;
+}
 
 interface RateRow {
   id: number;
@@ -31,6 +38,7 @@ interface Product {
   rate_headers: string[];
   rates: RateRow[];
   status: 'active' | 'inactive';
+  image_url?: string;
 }
 
 type ViewState = 'list' | 'apply';
@@ -41,16 +49,24 @@ export function DepositsPage() {
   const [view, setView] = useState<ViewState>('list');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [isBranchesLoading, setIsBranchesLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [applicationId, setApplicationId] = useState<string>('');
+  const [duplicateWarning, setDuplicateWarning] = useState<any>(null);
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    branch_id: '',
   });
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await client.get('/products?category=deposit');
+        const response = await client.get('products?category=deposit');
         setProducts(response.data.filter((p: Product) => p.status === 'active'));
       } catch (error) {
         console.error('Failed to fetch deposits', error);
@@ -60,6 +76,23 @@ export function DepositsPage() {
     };
 
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      setIsBranchesLoading(true);
+      try {
+        const response = await client.get('branches');
+        setBranches(response.data);
+      } catch (error) {
+        console.error('Failed to fetch branches', error);
+        toast.error('Failed to load branches');
+      } finally {
+        setIsBranchesLoading(false);
+      }
+    };
+
+    fetchBranches();
   }, []);
 
   useEffect(() => {
@@ -88,27 +121,47 @@ export function DepositsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phone) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.branch_id) {
       toast.error('Please fill in all fields');
+      return;
+    }
+
+    if (!isCaptchaValid) {
+      toast.error('Please complete the CAPTCHA verification');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await client.post('/applications/deposit', {
+      const response = await client.post('applications/deposit', {
         ...formData,
         deposit_type: selectedProduct?.title,
       });
-      toast.success('Your application has been submitted successfully!');
-      setView('list');
-      setFormData({ name: '', email: '', phone: '' });
-      window.scrollTo(0, 0);
-    } catch (error) {
+
+      if (response.data.success) {
+        setApplicationId(response.data.application_id);
+        setShowSuccessModal(true);
+        setFormData({ name: '', email: '', phone: '', branch_id: '' });
+        setIsCaptchaValid(false);
+      }
+    } catch (error: any) {
       console.error('Failed to submit application', error);
-      toast.error('Failed to submit application. Please try again later.');
+      if (error.response?.status === 409 && error.response?.data?.duplicate) {
+        setDuplicateWarning(error.response.data.existing_application);
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Failed to submit application. Please try again later.');
+      }
+      setIsCaptchaValid(false);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setView('list');
+    window.scrollTo(0, 0);
   };
 
   if (isLoading) {
@@ -167,7 +220,25 @@ export function DepositsPage() {
                     required
                   />
                 </div>
-                <div className="md:col-span-2 space-y-2">
+                <div className="space-y-2">
+                  <Label htmlFor="branch" className="text-sm font-semibold text-gray-700">Select Branch</Label>
+                  <select
+                    id="branch"
+                    value={formData.branch_id}
+                    onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
+                    className="h-12 w-full border border-gray-200 rounded-md px-3 focus:border-[#0099ff] focus:ring-2 focus:ring-[#0099ff]/10 outline-none transition-all"
+                    required
+                    disabled={isBranchesLoading}
+                  >
+                    <option value="">Choose your preferred branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.id} value={branch.id}>
+                        {branch.name} - {branch.district}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="phone" className="text-sm font-semibold text-gray-700">Phone Number</Label>
                   <Input
                     id="phone"
@@ -179,6 +250,36 @@ export function DepositsPage() {
                     required
                   />
                 </div>
+              </div>
+
+              {/* Duplicate Warning */}
+              {duplicateWarning && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-amber-900 mb-1">Application Already Exists</h4>
+                    <p className="text-sm text-amber-800">
+                      You have already applied for this product. Your application ID is{' '}
+                      <span className="font-bold">{duplicateWarning.application_id}</span> and current status is{' '}
+                      <span className="font-bold capitalize">{duplicateWarning.status}</span>.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDuplicateWarning(null)}
+                    className="text-amber-600 hover:text-amber-800 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Custom CAPTCHA */}
+              <div className="flex justify-center pt-4">
+                <Captcha
+                  onVerify={(isValid) => setIsCaptchaValid(isValid)}
+                  onReset={() => setIsCaptchaValid(false)}
+                />
               </div>
 
               <div className="pt-6 flex flex-col sm:flex-row gap-4">
@@ -194,7 +295,7 @@ export function DepositsPage() {
                 <Button
                   type="submit"
                   className="flex-[2] h-12 bg-[#0099ff] hover:bg-[#0088ee] text-white font-semibold text-lg"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isCaptchaValid}
                 >
                   {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -209,6 +310,37 @@ export function DepositsPage() {
               </p>
             </form>
           </div>
+
+          {/* Success Modal */}
+          {showSuccessModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in zoom-in slide-in-from-bottom-4 duration-300">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 className="w-10 h-10 text-green-600" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h3>
+                  <p className="text-gray-600 mb-6">
+                    Your deposit application has been submitted successfully.
+                  </p>
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-gray-600 mb-1">Your Application ID</p>
+                    <p className="text-2xl font-bold text-[#0099ff] tracking-wide">{applicationId}</p>
+                    <p className="text-xs text-gray-500 mt-2">Please save this ID for future reference</p>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Our team will review your application and contact you soon.
+                  </p>
+                  <Button
+                    onClick={handleCloseSuccessModal}
+                    className="w-full h-12 bg-[#0099ff] hover:bg-[#0088ee] text-white font-semibold transition-colors"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -236,10 +368,22 @@ export function DepositsPage() {
                 key={deposit.id}
                 className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#0099ff]/30 group"
               >
-                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block mb-6 group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300">
+                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block mb-6 group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300 overflow-hidden w-16 h-16 shrink-0 flex items-center justify-center">
                   <Icon className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">{deposit.title}</h3>
+
+                {/* Product Image after title */}
+                {deposit.image_url && (
+                  <div className="mb-4 rounded-xl overflow-hidden border border-gray-200">
+                    <img
+                      src={deposit.image_url}
+                      alt={deposit.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
                 <p className="text-gray-600 mb-6 line-clamp-3 text-sm leading-relaxed h-[4.5rem]">{deposit.description}</p>
 
                 <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-center justify-between">

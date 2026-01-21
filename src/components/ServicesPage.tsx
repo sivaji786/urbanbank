@@ -41,8 +41,8 @@ export function ServicesPage() {
       setError(null);
       try {
         const [servicesRes, chargesRes] = await Promise.all([
-          client.get('/services'),
-          client.get('/service-charges')
+          client.get('services'),
+          client.get('service-charges')
         ]);
 
         // Filter only active services and charges

@@ -1,7 +1,5 @@
-import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Separator } from './ui/separator';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
 import logo from 'figma:asset/6705fbbec794189a9f9b05c8b8f04e8469de538b.png';
 import { useState, useEffect, useRef } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
@@ -17,7 +15,7 @@ export function Footer() {
   useEffect(() => {
     const fetchVisitorStats = async () => {
       try {
-        const response = await client.get('/visitor-stats');
+        const response = await client.get('visitor-stats');
         setTotalVisits(response.data.total_visits || 0);
       } catch (error) {
         console.debug('Failed to fetch visitor stats:', error);
@@ -97,31 +95,6 @@ export function Footer() {
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
-      {/* Newsletter Section */}
-      <div className="border-b border-white/10">
-        <div className="max-w-[1400px] mx-auto px-6 py-12">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl mb-2">Stay Updated</h3>
-              <p className="text-sm text-gray-400">
-                Subscribe to our newsletter for the latest updates on banking services, interest rates, and exclusive offers.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Enter your email address"
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 h-11"
-              />
-              <Button className="bg-[#0099ff] hover:bg-[#0088ee] text-white h-11 px-6">
-                Subscribe
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer */}
       <div className="max-w-[1400px] mx-auto px-6 py-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-8 mb-10">

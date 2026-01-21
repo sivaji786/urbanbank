@@ -38,7 +38,7 @@ export function VisitorAnalytics() {
 
     const fetchStats = async () => {
         try {
-            const response = await client.get('/visitor-stats');
+            const response = await client.get('visitor-stats');
             setStats(response.data);
         } catch (err) {
             console.error('Failed to fetch visitor stats:', err);

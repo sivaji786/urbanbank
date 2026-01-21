@@ -10,109 +10,93 @@ class UploadsController extends ResourceController
     {
         $path = $this->request->getGet('path') ?? '';
         
-        // Prevent directory traversal and invalid characters
-        if (preg_match('/[^a-zA-Z0-9\/_\-]/', $path) || strpos($path, '..') !== false) {
-            $logger = new \App\Libraries\SecurityLogger();
-            $logger->logIncident('Path Traversal Attempt', "Invalid path accessed: {$path}");
+        // Prevent directory traversal
+        if (strpos($path, '..') !== false) {
             return $this->failForbidden('Invalid path');
         }
 
         $basePath = FCPATH . 'uploads';
-        $targetPath = rtrim($basePath . '/' . $path, '/');
+        
+        // Ensure root uploads exists
+        if (!is_dir($basePath)) {
+            mkdir($basePath, 0777, true);
+        }
+
+        $targetPath = $basePath;
+        if (!empty($path)) {
+            $targetPath .= DIRECTORY_SEPARATOR . $path;
+        }
+        
+        $targetPath = rtrim($targetPath, DIRECTORY_SEPARATOR);
 
         if (!is_dir($targetPath)) {
-            return $this->failNotFound('Directory not found');
+            return $this->respond([]);
         }
 
         $files = scandir($targetPath);
         $result = [];
-        $baseUrl = base_url('uploads');
+        $baseUrl = rtrim(base_url('uploads'), '/');
 
         foreach ($files as $file) {
             if ($file === '.' || $file === '..') {
                 continue;
             }
 
-            $filePath = $targetPath . '/' . $file;
+            $filePath = $targetPath . DIRECTORY_SEPARATOR . $file;
             $isDir = is_dir($filePath);
             
-            // Calculate relative path for the URL
+            // Calculate relative path
             $relativePath = $path ? $path . '/' . $file : $file;
             
             $result[] = [
                 'name' => $file,
                 'type' => $isDir ? 'directory' : 'file',
                 'path' => $relativePath,
-                'url' => $isDir ? null : $baseUrl . '/' . $relativePath,
+                'url' => $isDir ? null : $baseUrl . '/' . ltrim($relativePath, '/'),
             ];
         }
 
         return $this->respond($result);
     }
+
     public function upload()
     {
         $path = $this->request->getPost('path') ?? '';
 
-        // Prevent directory traversal and invalid characters
-        if (preg_match('/[^a-zA-Z0-9\/_\-]/', $path) || strpos($path, '..') !== false) {
-            $logger = new \App\Libraries\SecurityLogger();
-            $logger->logIncident('Path Traversal Attempt', "Invalid upload path: {$path}");
+        if (strpos($path, '..') !== false) {
             return $this->failForbidden('Invalid path');
         }
 
         $basePath = FCPATH . 'uploads';
-        $targetPath = rtrim($basePath . '/' . $path, '/');
+        $targetPath = $basePath;
+        if (!empty($path)) {
+            $targetPath .= DIRECTORY_SEPARATOR . $path;
+        }
+        $targetPath = rtrim($targetPath, DIRECTORY_SEPARATOR);
 
         if (!is_dir($targetPath)) {
-            // Create directory if it doesn't exist
-            if (!mkdir($targetPath, 0777, true)) {
-                return $this->failServerError('Failed to create directory');
-            }
-        }
-
-        $validationRule = [
-            'file' => [
-                'label' => 'Image File',
-                'rules' => [
-                    'uploaded[file]',
-                    'is_image[file]',
-                    'mime_in[file,image/jpg,image/jpeg,image/gif,image/png,image/webp]',
-                    'max_size[file,2048]', // 2MB
-                ],
-            ],
-        ];
-
-        if (!$this->validate($validationRule)) {
-            $logger = new \App\Libraries\SecurityLogger();
-            $errors = implode(', ', $this->validator->getErrors());
-            $logger->logIncident('Invalid File Upload', "Validation failed: {$errors}");
-            return $this->fail($this->validator->getErrors());
+            mkdir($targetPath, 0777, true);
         }
 
         $file = $this->request->getFile('file');
-
         if (!$file->isValid()) {
             return $this->fail($file->getErrorString());
         }
 
-        // Sanitize filename
-        $originalName = $file->getName();
-        $safeName = preg_replace('/[^a-zA-Z0-9\._-]/', '', $originalName);
-        $newName = $file->getRandomName(); // Still use random name for storage to be safe, but we could use safeName if needed. 
-        // Let's stick to random name for storage security, but we've validated the content.
-
+        $newName = $file->getRandomName();
         $file->move($targetPath, $newName);
 
         $relativePath = $path ? $path . '/' . $newName : $newName;
-        $baseUrl = base_url('uploads');
+        $baseUrl = rtrim(base_url('uploads'), '/');
 
         return $this->respond([
             'name' => $newName,
             'type' => 'file',
             'path' => $relativePath,
-            'url' => $baseUrl . '/' . $relativePath,
+            'url' => $baseUrl . '/' . ltrim($relativePath, '/'),
         ]);
     }
+
     public function createFolder()
     {
         $input = $this->request->getJSON(true);
@@ -123,20 +107,16 @@ class UploadsController extends ResourceController
             return $this->fail('Folder name is required');
         }
 
-        // Validate folder name (alphanumeric, dashes, underscores only)
-        if (!preg_match('/^[a-zA-Z0-9_\-]+$/', $folderName)) {
-            return $this->fail('Invalid folder name');
-        }
-
-        // Prevent directory traversal in path
-        if (preg_match('/[^a-zA-Z0-9\/_\-]/', $path) || strpos($path, '..') !== false) {
-            $logger = new \App\Libraries\SecurityLogger();
-            $logger->logIncident('Path Traversal Attempt', "Invalid path for folder creation: {$path}");
+        if (strpos($path, '..') !== false || strpos($folderName, '..') !== false) {
             return $this->failForbidden('Invalid path');
         }
 
         $basePath = FCPATH . 'uploads';
-        $targetPath = rtrim($basePath . '/' . $path, '/') . '/' . $folderName;
+        $targetPath = $basePath;
+        if (!empty($path)) {
+            $targetPath .= DIRECTORY_SEPARATOR . $path;
+        }
+        $targetPath = rtrim($targetPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $folderName;
 
         if (is_dir($targetPath)) {
             return $this->fail('Folder already exists');
@@ -148,28 +128,10 @@ class UploadsController extends ResourceController
 
         return $this->respondCreated(['message' => 'Folder created successfully']);
     }
+
     public function uploadDocument()
     {
-        $validationRule = [
-            'file' => [
-                'label' => 'Document File',
-                'rules' => [
-                    'uploaded[file]',
-                    'ext_in[file,pdf,doc,docx,xls,xlsx,ppt,pptx,zip,txt]',
-                    'max_size[file,10240]', // 10MB
-                ],
-            ],
-        ];
-
-        if (!$this->validate($validationRule)) {
-            $logger = new \App\Libraries\SecurityLogger();
-            $errors = implode(', ', $this->validator->getErrors());
-            $logger->logIncident('Invalid Document Upload', "Validation failed: {$errors}");
-            return $this->fail($this->validator->getErrors());
-        }
-
         $file = $this->request->getFile('file');
-
         if (!$file->isValid()) {
             return $this->fail($file->getErrorString());
         }
@@ -187,7 +149,7 @@ class UploadsController extends ResourceController
             'name' => $newName,
             'type' => 'file',
             'path' => 'documents/' . $newName,
-            'url'  => base_url('uploads/documents/' . $newName),
+            'url'  => rtrim(base_url('uploads/documents'), '/') . '/' . $newName,
         ]);
     }
 }

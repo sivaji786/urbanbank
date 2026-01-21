@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react';
 import { ChevronRight } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import client from '../api/client';
 import {
   Carousel,
   CarouselContent,
@@ -8,116 +9,153 @@ import {
   CarouselPrevious,
 } from './ui/carousel';
 
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  image_url: string | null;
+  category: 'deposit' | 'loan';
+  status: 'active' | 'inactive';
+}
 
-const services = [
-  {
-    id: 1,
-    title: 'Project Finance',
-    description: 'Comprehensive financial solutions for large-scale infrastructure and industrial projects with flexible repayment options.',
-    image: 'https://images.unsplash.com/photo-1574884280706-7342ca3d4231?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9qZWN0JTIwZmluYW5jZSUyMGJ1c2luZXNzfGVufDF8fHx8MTc2MTgyODc3OHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 2,
-    title: 'Gold Loans',
-    description: 'Quick and secure loans against gold jewelry with competitive interest rates and minimal documentation requirements.',
-    image: 'https://images.unsplash.com/photo-1717409014701-8e630ff057f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxnb2xkJTIwamV3ZWxyeSUyMGxvYW58ZW58MXx8fHwxNzYxODI4Nzc4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 3,
-    title: 'MSME Loans',
-    description: 'Tailored financing solutions for micro, small, and medium enterprises to support business growth and working capital needs.',
-    image: 'https://images.unsplash.com/photo-1647973035166-2abf410c68b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbWFsbCUyMGJ1c2luZXNzJTIwTVNNRXxlbnwxfHx8fDE3NjE4Mjg3Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 4,
-    title: 'Mortgage Loans',
-    description: 'Flexible property-backed loans with attractive interest rates for both residential and commercial real estate financing.',
-    image: 'https://images.unsplash.com/photo-1729838809728-48566c1ef0e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb3J0Z2FnZSUyMHByb3BlcnR5JTIwbG9hbnxlbnwxfHx8fDE3NjE4Mjg3Nzl8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 5,
-    title: 'Home Loans',
-    description: 'Affordable home loan solutions to help you purchase or construct your dream home with easy EMI options and long tenures.',
-    image: 'https://images.unsplash.com/photo-1743487014165-c26c868b8186?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxob21lJTIwaG91c2UlMjBrZXlzfGVufDF8fHx8MTc2MTgyODc4MHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 6,
-    title: 'Digital Banking',
-    description: 'Modern banking at your fingertips with mobile and internet banking services for seamless transactions and account management.',
-    image: 'https://images.unsplash.com/photo-1649486116188-b464d7f864a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkaWdpdGFsJTIwYmFua2luZyUyMG1vYmlsZXxlbnwxfHx8fDE3NjE4MDk0OTd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  },
-  {
-    id: 7,
-    title: 'ATM Facility',
-    description: '24/7 access to your funds through our extensive network of ATMs with secure transactions and multiple banking services.',
-    image: 'https://images.unsplash.com/photo-1746826618149-7c54e99e7946?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxBVE0lMjBiYW5raW5nJTIwbWFjaGluZXxlbnwxfHx8fDE3NjE4Mjg3ODB8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-  }
-];
+interface ServiceItem {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  category: 'deposit' | 'loan';
+}
+
+const defaultImage = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW5raW5nJTIwc2VydmljZXN8ZW58MXx8fHwxNzYxODI4NzgwfDA&ixlib=rb-4.1.0&q=80&w=1080';
 
 export function BankingExcellenceSection() {
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await client.get('products');
+      const products: Product[] = response.data;
+
+      // Filter active products and map to service items
+      const activeProducts = products
+        .filter(product => product.status === 'active')
+        .map(product => ({
+          id: product.id,
+          title: product.title,
+          description: product.description || 'Explore our banking solutions tailored to meet your financial needs.',
+          image: product.image_url || defaultImage,
+          category: product.category
+        }));
+
+      setServices(activeProducts);
+    } catch (error) {
+      console.error('Failed to fetch products', error);
+      // Keep empty array on error - component will show nothing
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <section className="py-16 bg-blue-50">
-      <div className="container mx-auto px-4">
+    <section className="py-24 bg-gradient-to-b from-white to-blue-50/50">
+      <div className="container mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <p className="text-[#0099ff] text-sm uppercase tracking-wide mb-2">Banking Excellence</p>
-          <h2 className="text-gray-900">Our Products & Services</h2>
+        <div className="max-w-3xl mx-auto text-center mb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <span className="inline-block px-4 py-1.5 bg-[#0099ff]/10 text-[#0099ff] text-xs font-black uppercase tracking-widest rounded-full mb-4">
+            Financial Solutions
+          </span>
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 tracking-tight">
+            Our Products <span className="text-[#0099ff]">&</span> Services
+          </h2>
+          <p className="text-gray-600 text-lg md:text-xl font-medium leading-relaxed">
+            Discover a wide range of innovative banking products designed to empower your financial journey and secure your future.
+          </p>
         </div>
 
-        {/* Services Carousel */}
-        <div className="max-w-7xl mx-auto mb-16">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-4">
-              {services.map((service) => (
-                <CarouselItem key={service.id} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/5">
-                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
-                    {/* Service Image */}
-                    <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                      <ImageWithFallback
-                        src={service.image}
-                        alt={service.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-
-                    {/* Service Content */}
-                    <div className="p-5 flex flex-col flex-grow">
-                      {/* Title */}
-                      <h3 className="text-gray-900 text-base mb-2">
-                        {service.title}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-grow">
-                        {service.description}
-                      </p>
-
-                      {/* Learn More Link */}
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="flex flex-col justify-center items-center py-20 gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-100 border-t-[#0099ff]"></div>
+            <p className="text-gray-400 font-bold animate-pulse">Loading Excellence...</p>
+          </div>
+        ) : services.length > 0 ? (
+          /* Services Carousel - 4 cards visible */
+          <div className="max-w-7xl mx-auto">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-6">
+                {services.map((service) => (
+                  <CarouselItem key={service.id} className="pl-6 !basis-full sm:!basis-1/2 md:!basis-1/3 lg:!basis-1/4">
+                    <div className="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,153,255,0.15)] transition-all duration-500 flex flex-col h-full hover:-translate-y-2">
                       <a
-                        href="#"
-                        className="text-[#0099ff] hover:text-[#0077cc] transition-colors text-sm inline-flex items-center gap-1 group/link"
+                        href={`#${service.category === 'deposit' ? 'deposit-details' : 'loan-details'}/${service.id}`}
+                        className="flex flex-col flex-grow"
                       >
-                        Learn More
-                        <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
+                        {/* Service Image Section */}
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          <img
+                            src={service.image}
+                            alt={service.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-[#0099ff] shadow-sm">
+                            {service.category}
+                          </div>
+                        </div>
+
+                        {/* Service Content */}
+                        <div className="p-8 flex flex-col flex-grow">
+                          <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-[#0099ff] transition-colors leading-tight">
+                            {service.title}
+                          </h3>
+                          <p className="text-gray-600 text-base mb-6 line-clamp-3 leading-relaxed font-medium">
+                            {service.description}
+                          </p>
+                        </div>
                       </a>
+
+                      <div className="px-8 pb-8 flex flex-col mt-auto">
+                        <div className="pt-6 border-t border-gray-50">
+                          <a
+                            href={`#${service.category === 'deposit' ? 'deposit-details' : 'loan-details'}/${service.id}`}
+                            className="inline-flex items-center gap-2 text-[#0099ff] font-black text-sm uppercase tracking-wider group/link"
+                          >
+                            Learn More
+                            <div className="w-8 h-8 rounded-full bg-[#0099ff]/10 flex items-center justify-center group-hover/link:bg-[#0099ff] group-hover/link:text-white transition-all duration-300">
+                              <ChevronRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
+                            </div>
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden lg:flex" />
-            <CarouselNext className="hidden lg:flex" />
-          </Carousel>
-        </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex justify-center gap-4 mt-12">
+                <CarouselPrevious className="static translate-y-0 h-12 w-12 border-2 border-gray-100 bg-white text-gray-500 hover:bg-[#0099ff] hover:text-white hover:border-[#0099ff] transition-all rounded-full" />
+                <CarouselNext className="static translate-y-0 h-12 w-12 border-2 border-gray-100 bg-white text-gray-500 hover:bg-[#0099ff] hover:text-white hover:border-[#0099ff] transition-all rounded-full" />
+              </div>
+            </Carousel>
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+            <p className="text-gray-400 font-bold">No products available at the moment.</p>
+          </div>
+        )}
       </div>
-
-
     </section>
   );
 }
+
+export default BankingExcellenceSection;

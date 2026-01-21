@@ -36,7 +36,7 @@ export function VisionMissionPage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        const response = await client.get('/pages/vision-mission');
+        const response = await client.get('pages/vision-mission');
         if (response.data && response.data.content) {
           let data = response.data.content;
           if (typeof data === 'string') {

@@ -20,7 +20,8 @@ class ProductModel extends Model
         'summary_rate',
         'features',
         'rate_headers',
-        'status'
+        'status',
+        'image_url'
     ];
 
     // Dates

@@ -26,7 +26,7 @@ export const useVisitorTracking = () => {
                 const referrer = document.referrer || null;
                 const pageUrl = window.location.href;
 
-                await client.post('/track-visit', {
+                await client.post('track-visit', {
                     session_id: sessionId,
                     referrer,
                     page_url: pageUrl,

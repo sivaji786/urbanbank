@@ -21,8 +21,8 @@ export function ManagementPage() {
     const fetchData = async () => {
       try {
         const [teamResponse, pageResponse] = await Promise.all([
-          client.get('/team-members'),
-          client.get('/pages/management')
+          client.get('team-members'),
+          client.get('pages/management')
         ]);
         setTeamMembers(teamResponse.data);
         setPageContent(pageResponse.data.content);

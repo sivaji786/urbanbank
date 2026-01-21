@@ -33,9 +33,11 @@ import { BranchManagement } from './BranchManagement';
 import { ServicesManagement } from './ServicesManagement';
 import { ServiceChargesManagement } from './ServiceChargesManagement';
 import { VisitorAnalytics } from './VisitorAnalytics';
+import { ApplicationManagement } from '../ApplicationManagement';
+import { ApplicationDetails } from '../ApplicationDetails';
 import client from '../../api/client';
 
-type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans' | 'services' | 'service-charges' | 'visitor-analytics';
+type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans' | 'services' | 'service-charges' | 'visitor-analytics' | 'applications';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -44,6 +46,7 @@ interface AdminDashboardProps {
 export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [currentView, setCurrentView] = useState<AdminView>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
   const [statsData, setStatsData] = useState({
     news: 0,
     events: 0,
@@ -52,10 +55,20 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
   });
   const { logout } = useAuth();
 
+  // Listen for hash changes to trigger re-renders
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentHash(window.location.hash);
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await client.get('/stats');
+        const response = await client.get('stats');
         setStatsData(response.data);
       } catch (error) {
         console.error('Failed to fetch dashboard statistics', error);
@@ -81,6 +94,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'gallery' as AdminView, label: 'Gallery', icon: Images },
     { id: 'downloads' as AdminView, label: 'Downloads', icon: Download },
     { id: 'reports' as AdminView, label: 'Financial Reports', icon: TrendingUp },
+    { id: 'applications' as AdminView, label: 'Applications', icon: FileText },
     { id: 'settings' as AdminView, label: 'Settings', icon: Settings },
   ];
 
@@ -153,6 +167,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                 key={item.id}
                 onClick={() => {
                   setCurrentView(item.id);
+                  window.location.hash = `#admin/${item.id}`;
                   if (window.innerWidth < 1024) setSidebarOpen(false);
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-all ${isActive
@@ -180,6 +195,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   key={item.id}
                   onClick={() => {
                     setCurrentView(item.id);
+                    window.location.hash = `#admin/${item.id}`;
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2 pl-8 text-sm rounded-lg transition-all ${isActive
@@ -208,6 +224,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                   key={item.id}
                   onClick={() => {
                     setCurrentView(item.id);
+                    window.location.hash = `#admin/${item.id}`;
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-3 py-2 pl-8 text-sm rounded-lg transition-all ${isActive
@@ -236,127 +253,141 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
           }`}
       >
         <div className="p-4">
-          {currentView === 'overview' && (
+          {/* Check for application details route */}
+          {(() => {
+            if (currentHash.startsWith('#admin/application-details/')) {
+              const id = currentHash.split('/')[2];
+              return <ApplicationDetails id={id} />;
+            }
+            return null;
+          })()}
+
+          {!currentHash.startsWith('#admin/application-details/') && (
             <>
-              {/* Welcome Section */}
-              <div className="mb-6">
-                <h2 className="text-gray-900 mb-2">Welcome back, Administrator</h2>
-                <p className="text-gray-600">
-                  Manage your bank's website content from this dashboard
-                </p>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {stats.map((stat, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div
-                      className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4`}
-                    >
-                      <div className="w-6 h-6 bg-white/30 rounded"></div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                    <h3 className="text-gray-900">{stat.value}</h3>
+              {currentView === 'overview' && (
+                <>
+                  {/* Welcome Section */}
+                  <div className="mb-6">
+                    <h2 className="text-gray-900 mb-2">Welcome back, Administrator</h2>
+                    <p className="text-gray-600">
+                      Manage your bank's website content from this dashboard
+                    </p>
                   </div>
-                ))}
-              </div>
 
-              {/* Quick Actions */}
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-                <h3 className="text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {menuItems.slice(1, -1).map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setCurrentView(item.id)}
-                        className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-[#0099ff] hover:bg-[#0099ff]/5 transition-all group"
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    {stats.map((stat, index) => (
+                      <div
+                        key={index}
+                        className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                       >
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 group-hover:bg-[#0099ff]/10 flex items-center justify-center transition-colors">
-                          <Icon className="h-6 w-6 text-gray-600 group-hover:text-[#0099ff] transition-colors" />
+                        <div
+                          className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br ${stat.color} mb-4`}
+                        >
+                          <div className="w-6 h-6 bg-white/30 rounded"></div>
                         </div>
-                        <span className="text-sm text-gray-700 group-hover:text-[#0099ff] transition-colors">
-                          Manage {item.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+                        <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
+                        <h3 className="text-gray-900">{stat.value}</h3>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                    <h3 className="text-gray-900 mb-4">Quick Actions</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {menuItems.slice(1, -1).map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setCurrentView(item.id)}
+                            className="flex flex-col items-center gap-3 p-4 border-2 border-gray-200 rounded-lg hover:border-[#0099ff] hover:bg-[#0099ff]/5 transition-all group"
+                          >
+                            <div className="w-12 h-12 rounded-lg bg-gray-100 group-hover:bg-[#0099ff]/10 flex items-center justify-center transition-colors">
+                              <Icon className="h-6 w-6 text-gray-600 group-hover:text-[#0099ff] transition-colors" />
+                            </div>
+                            <span className="text-sm text-gray-700 group-hover:text-[#0099ff] transition-colors">
+                              Manage {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {currentView === 'pages' && <PageManager />}
+              {currentView === 'team-members' && <TeamMemberManager />}
+              {currentView === 'deaf-accounts' && <DeafAccountsManagement />}
+
+              {currentView === 'news' && <NewsManagement />}
+
+              {currentView === 'events' && (
+                <ContentManager
+                  title="Events Management"
+                  resource="events"
+                  columns={[
+                    { key: 'title', label: 'Title' },
+                    { key: 'date', label: 'Date', type: 'date' },
+                    { key: 'location', label: 'Location' },
+                  ]}
+                  fields={[
+                    { key: 'title', label: 'Title', type: 'text' },
+                    { key: 'description', label: 'Description', type: 'textarea' },
+                    { key: 'date', label: 'Date', type: 'date' },
+                    { key: 'location', label: 'Location', type: 'text' },
+                  ]}
+                />
+              )}
+
+              {currentView === 'gallery' && <GalleryManagement />}
+
+              {currentView === 'downloads' && (
+                <ContentManager
+                  title="Downloads Management"
+                  resource="downloads"
+                  columns={[
+                    { key: 'title', label: 'Title' },
+                    { key: 'category', label: 'Category' },
+                  ]}
+                  fields={[
+                    { key: 'title', label: 'Title', type: 'text' },
+                    { key: 'file_url', label: 'File URL', type: 'file' },
+                    { key: 'category', label: 'Category', type: 'text' },
+                  ]}
+                />
+              )}
+
+              {currentView === 'reports' && (
+                <ContentManager
+                  title="Financial Reports Management"
+                  resource="reports"
+                  columns={[
+                    { key: 'title', label: 'Title' },
+                    { key: 'year', label: 'Year' },
+                    { key: 'quarter', label: 'Quarter' },
+                  ]}
+                  fields={[
+                    { key: 'title', label: 'Title', type: 'text' },
+                    { key: 'file_url', label: 'File URL', type: 'file' },
+                    { key: 'year', label: 'Year', type: 'text' },
+                    { key: 'quarter', label: 'Quarter', type: 'text' },
+                  ]}
+                />
+              )}
+
+              {currentView === 'settings' && <SettingsManagement />}
+              {currentView === 'branches' && <BranchManagement />}
+              {currentView === 'deposits' && <ProductManagement category="deposit" />}
+              {currentView === 'loans' && <ProductManagement category="loan" />}
+              {currentView === 'services' && <ServicesManagement />}
+              {currentView === 'service-charges' && <ServiceChargesManagement />}
+              {currentView === 'visitor-analytics' && <VisitorAnalytics />}
+              {currentView === 'applications' && <ApplicationManagement />}
             </>
           )}
-
-          {currentView === 'pages' && <PageManager />}
-          {currentView === 'team-members' && <TeamMemberManager />}
-          {currentView === 'deaf-accounts' && <DeafAccountsManagement />}
-
-          {currentView === 'news' && <NewsManagement />}
-
-          {currentView === 'events' && (
-            <ContentManager
-              title="Events Management"
-              resource="events"
-              columns={[
-                { key: 'title', label: 'Title' },
-                { key: 'date', label: 'Date', type: 'date' },
-                { key: 'location', label: 'Location' },
-              ]}
-              fields={[
-                { key: 'title', label: 'Title', type: 'text' },
-                { key: 'description', label: 'Description', type: 'textarea' },
-                { key: 'date', label: 'Date', type: 'date' },
-                { key: 'location', label: 'Location', type: 'text' },
-              ]}
-            />
-          )}
-
-          {currentView === 'gallery' && <GalleryManagement />}
-
-          {currentView === 'downloads' && (
-            <ContentManager
-              title="Downloads Management"
-              resource="downloads"
-              columns={[
-                { key: 'title', label: 'Title' },
-                { key: 'category', label: 'Category' },
-              ]}
-              fields={[
-                { key: 'title', label: 'Title', type: 'text' },
-                { key: 'file_url', label: 'File URL', type: 'file' },
-                { key: 'category', label: 'Category', type: 'text' },
-              ]}
-            />
-          )}
-
-          {currentView === 'reports' && (
-            <ContentManager
-              title="Financial Reports Management"
-              resource="reports"
-              columns={[
-                { key: 'title', label: 'Title' },
-                { key: 'year', label: 'Year' },
-                { key: 'quarter', label: 'Quarter' },
-              ]}
-              fields={[
-                { key: 'title', label: 'Title', type: 'text' },
-                { key: 'file_url', label: 'File URL', type: 'file' },
-                { key: 'year', label: 'Year', type: 'text' },
-                { key: 'quarter', label: 'Quarter', type: 'text' },
-              ]}
-            />
-          )}
-
-          {currentView === 'settings' && <SettingsManagement />}
-          {currentView === 'branches' && <BranchManagement />}
-          {currentView === 'deposits' && <ProductManagement category="deposit" />}
-          {currentView === 'loans' && <ProductManagement category="loan" />}
-          {currentView === 'services' && <ServicesManagement />}
-          {currentView === 'service-charges' && <ServiceChargesManagement />}
-          {currentView === 'visitor-analytics' && <VisitorAnalytics />}
         </div>
       </main>
     </div>

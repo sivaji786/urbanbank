@@ -42,7 +42,7 @@ export function SettingsManagement() {
   const fetchSettings = async () => {
     setIsLoading(true);
     try {
-      const response = await client.get('/settings');
+      const response = await client.get('settings');
       setSettings(response.data || {});
     } catch (error) {
       console.error('Failed to fetch settings', error);
@@ -55,7 +55,7 @@ export function SettingsManagement() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await client.post('/settings', settings);
+      await client.post('settings', settings);
       await refreshSettings();
       toast.success('Settings saved successfully!');
     } catch (error) {

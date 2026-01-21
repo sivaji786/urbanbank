@@ -36,7 +36,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const fetchSettings = async () => {
         try {
-            const response = await client.get('/settings');
+            const response = await client.get('settings');
             if (response.data) {
                 setSettings({
                     ...defaultSettings,

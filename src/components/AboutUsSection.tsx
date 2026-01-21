@@ -10,9 +10,9 @@ export function AboutUsSection() {
           {/* Left: Square Bank Building Image with Rounded Corners */}
           <div className="flex justify-center lg:justify-start">
             <div className="relative w-full max-w-[500px]">
-              <img 
-                src={bankBuilding} 
-                alt="Guntur Urban Bank Building" 
+              <img
+                src={bankBuilding}
+                alt="Guntur Urban Bank Building"
                 className="w-full h-auto rounded-2xl shadow-xl"
               />
             </div>
@@ -31,7 +31,7 @@ export function AboutUsSection() {
               <p className="text-base text-gray-700 leading-relaxed">
                 <span className="text-gray-900">THE GUNTUR COOPERATIVE URBAN BANK LIMITED</span>, is premiere Co-operative bank in state of Andhra Pradesh. It is having 13 branches.
               </p>
-              
+
               <p className="text-base text-gray-600 leading-relaxed">
                 5 Branches in Guntur city (Brodipet, Kothapet, Pattabhi puram, Chandramouli nagar, R.Agraharam), 6 branches in other towns in Guntur District (Sattenapalli, Chilakaluripet, Ponnur, Tenali, Narasaraopet, Mangalagiri), 1 in Krishna district (Gollapudi) & 1 in Prakasam District (Ongole).
               </p>
@@ -42,8 +42,9 @@ export function AboutUsSection() {
             </div>
 
             <div className="pt-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
+                onClick={() => window.location.hash = '#about'}
                 className="bg-[#0099ff] hover:bg-[#0088ee] text-white px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 group"
               >
                 View More
@@ -56,3 +57,5 @@ export function AboutUsSection() {
     </section>
   );
 }
+
+export default AboutUsSection;

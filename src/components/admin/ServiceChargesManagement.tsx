@@ -56,7 +56,7 @@ export function ServiceChargesManagement() {
         setLoading(true);
         setError(null);
         try {
-            const response = await client.get('/service-charges');
+            const response = await client.get('service-charges');
             setServiceCharges(response.data);
         } catch (err) {
             console.error('Failed to fetch service charges:', err);
@@ -111,7 +111,7 @@ export function ServiceChargesManagement() {
                 await client.put(`/service-charges/${editingItem.id}`, formData);
                 setSuccess('Service charge updated successfully.');
             } else {
-                await client.post('/service-charges', formData);
+                await client.post('service-charges', formData);
                 setSuccess('Service charge added successfully.');
             }
             setIsDialogOpen(false);

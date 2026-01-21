@@ -63,13 +63,32 @@ class ProductController extends ResourceController
 
     public function create()
     {
-        $data = $this->request->getJSON(true);
+        $data = $this->request->getPost();
+        
+        // Handle image upload
+        $imageFile = $this->request->getFile('image');
+        if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $newName = $imageFile->getRandomName();
+            $imageFile->move(FCPATH . 'uploads/products', $newName);
+            $data['image_url'] = base_url('uploads/products/' . $newName);
+        }
+
+        // Decode JSON fields from form-data if they come as strings
+        if (isset($data['features']) && is_string($data['features'])) {
+            $data['features'] = json_decode($data['features'], true);
+        }
+        if (isset($data['rate_headers']) && is_string($data['rate_headers'])) {
+            $data['rate_headers'] = json_decode($data['rate_headers'], true);
+        }
         
         // Extract rates if present
-        $rates = $data['rates'] ?? [];
-        unset($data['rates']);
+        $rates = [];
+        if (isset($data['rates'])) {
+            $rates = is_string($data['rates']) ? json_decode($data['rates'], true) : $data['rates'];
+            unset($data['rates']);
+        }
 
-        // Encode JSON fields
+        // Encode JSON fields for storage
         if (isset($data['features'])) {
             $data['features'] = json_encode($data['features']);
         }
@@ -98,12 +117,40 @@ class ProductController extends ResourceController
 
     public function update($id = null)
     {
-        $data = $this->request->getJSON(true);
+        $data = $this->request->getPost();
         
-        $rates = $data['rates'] ?? null;
-        unset($data['rates']);
+        // If it's a JSON request (legacy or non-multipart), get JSON data
+        if (empty($data)) {
+            $data = $this->request->getJSON(true);
+        }
 
-        // Encode JSON fields
+        if (!$data) {
+            return $this->fail('No data provided');
+        }
+
+        // Handle image upload
+        $imageFile = $this->request->getFile('image');
+        if ($imageFile && $imageFile->isValid() && !$imageFile->hasMoved()) {
+            $newName = $imageFile->getRandomName();
+            $imageFile->move(FCPATH . 'uploads/products', $newName);
+            $data['image_url'] = base_url('uploads/products/' . $newName);
+        }
+        
+        // Decode JSON fields from form-data if they come as strings
+        if (isset($data['features']) && is_string($data['features'])) {
+            $data['features'] = json_decode($data['features'], true);
+        }
+        if (isset($data['rate_headers']) && is_string($data['rate_headers'])) {
+            $data['rate_headers'] = json_decode($data['rate_headers'], true);
+        }
+
+        $rates = null;
+        if (isset($data['rates'])) {
+            $rates = is_string($data['rates']) ? json_decode($data['rates'], true) : $data['rates'];
+            unset($data['rates']);
+        }
+
+        // Encode JSON fields for storage
         if (isset($data['features'])) {
             $data['features'] = json_encode($data['features']);
         }

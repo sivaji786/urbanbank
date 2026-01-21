@@ -53,7 +53,7 @@ export function BranchManagement() {
     const fetchBranches = async () => {
         setIsLoading(true);
         try {
-            const response = await client.get('/branches');
+            const response = await client.get('branches');
             setBranches(response.data);
         } catch (error) {
             console.error('Failed to fetch branches', error);

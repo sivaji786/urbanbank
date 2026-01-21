@@ -38,7 +38,7 @@ export function NewsManagement() {
     setLoading(true);
     setError(null);
     try {
-      const response = await client.get('/news');
+      const response = await client.get('news');
       setNews(response.data);
     } catch (err) {
       console.error('Failed to fetch news:', err);
@@ -102,7 +102,7 @@ export function NewsManagement() {
         ));
         setSuccess('News item updated successfully.');
       } else {
-        const response = await client.post('/news', formData);
+        const response = await client.post('news', formData);
         const newItem = response.data.data || response.data;
         setNews([newItem, ...news]);
         setSuccess('News item added successfully.');

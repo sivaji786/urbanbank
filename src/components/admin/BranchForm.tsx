@@ -61,7 +61,7 @@ export function BranchForm({ branch, onBack, onSuccess }: BranchFormProps) {
                 await client.put(`/branches/${currentBranch.id}`, data);
                 toast.success('Branch updated successfully');
             } else {
-                await client.post('/branches', data);
+                await client.post('branches', data);
                 toast.success('Branch added successfully');
             }
             onSuccess();

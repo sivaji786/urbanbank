@@ -1,37 +1,45 @@
 import { Header } from './components/Header';
 import { HeroSlider } from './components/HeroSlider';
 import { AboutUsSection } from './components/AboutUsSection';
-import { DICGCSection } from './components/DICGCSection';
 import { NewsToolsSection } from './components/NewsToolsSection';
 import { BankingExcellenceSection } from './components/BankingExcellenceSection';
 import { LatestEventsSection } from './components/LatestEventsSection';
-import { BranchLocator } from './components/BranchLocator';
-import { AboutUsPage } from './components/AboutUsPage';
-import { ManagementPage } from './components/ManagementPage';
-import { VisionMissionPage } from './components/VisionMissionPage';
-import { ContactPage } from './components/ContactPage';
-import { DeafAccountsPage } from './components/DeafAccountsPage';
-import { GalleryPage } from './components/GalleryPage';
-import { DownloadsPage } from './components/DownloadsPage';
-import { FinancialReportsPage } from './components/FinancialReportsPage';
-import { DepositsPage } from './components/DepositsPage';
-import { LoansPage } from './components/LoansPage';
-import { ServicesPage } from './components/ServicesPage';
 import { GrievanceCTA } from './components/GrievanceCTA';
 import { Footer } from './components/Footer';
-import { LoginPage } from './components/LoginPage';
-import { AdminDashboard } from './components/admin/AdminDashboard';
-import { NewsPage } from './components/NewsPage';
-import { NewsDetailsPage } from './components/NewsDetailsPage';
-import { ProductDetailPage } from './components/ProductDetailPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SettingsProvider } from './contexts/SettingsContext';
-import { useState, useEffect } from 'react';
-import { getPageFromHash } from './utils/navigation';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { getPageFromHash, PageType } from './utils/navigation';
 import { Toaster } from 'sonner';
 import { useVisitorTracking } from './hooks/useVisitorTracking';
 import { SEO } from './components/SEO';
 import { useSettings } from './contexts/SettingsContext';
+
+// Lazy load components that are not on the home page
+const AboutUsPage = lazy(() => import('./components/AboutUsPage').then(m => ({ default: m.AboutUsPage })));
+const ManagementPage = lazy(() => import('./components/ManagementPage').then(m => ({ default: m.ManagementPage })));
+const VisionMissionPage = lazy(() => import('./components/VisionMissionPage').then(m => ({ default: m.VisionMissionPage })));
+const ContactPage = lazy(() => import('./components/ContactPage').then(m => ({ default: m.ContactPage })));
+const DeafAccountsPage = lazy(() => import('./components/DeafAccountsPage').then(m => ({ default: m.DeafAccountsPage })));
+const GalleryPage = lazy(() => import('./components/GalleryPage').then(m => ({ default: m.GalleryPage })));
+const DownloadsPage = lazy(() => import('./components/DownloadsPage').then(m => ({ default: m.DownloadsPage })));
+const FinancialReportsPage = lazy(() => import('./components/FinancialReportsPage').then(m => ({ default: m.FinancialReportsPage })));
+const DepositsPage = lazy(() => import('./components/DepositsPage').then(m => ({ default: m.DepositsPage })));
+const LoansPage = lazy(() => import('./components/LoansPage').then(m => ({ default: m.LoansPage })));
+const ServicesPage = lazy(() => import('./components/ServicesPage').then(m => ({ default: m.ServicesPage })));
+const LoginPage = lazy(() => import('./components/LoginPage').then(m => ({ default: m.LoginPage })));
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const NewsPage = lazy(() => import('./components/NewsPage').then(m => ({ default: m.NewsPage })));
+const NewsDetailsPage = lazy(() => import('./components/NewsDetailsPage').then(m => ({ default: m.NewsDetailsPage })));
+const ProductDetailPage = lazy(() => import('./components/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
+const BranchLocator = lazy(() => import('./components/BranchLocator').then(m => ({ default: m.BranchLocator })));
+
+// Loading component for Suspense
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="w-8 h-8 border-4 border-[#0099ff] border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -97,7 +105,11 @@ function AppContent() {
         setCurrentPage(page);
       }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, currentPage]);
+
+  const handleNavigate = useCallback((page: PageType) => {
+    setCurrentPage(page);
+  }, []);
 
   const handleLoginSuccess = () => {
     window.location.hash = '#admin';
@@ -172,140 +184,117 @@ function AppContent() {
   const seoData = getPageSEO();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-8 h-8 border-4 border-[#0099ff] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (currentPage === 'admin' && isAuthenticated) {
-    return <AdminDashboard onLogout={handleLogout} />;
-  }
-
-  if (currentPage === 'login') {
-    return (
-      <>
-        <SEO title="Admin Login" description="Secure access to the Urban Bank Administration Panel." />
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
-      </>
-    );
-  }
-
-  // Check for dynamic routes
-  if (currentPage.startsWith('news-details/')) {
-    const id = currentPage.split('/')[1];
-    return (
-      <div className="min-h-screen bg-white">
-        <SEO title="News & Events" />
-        <Header onNavigate={(page) => setCurrentPage(page)} />
-        <main className="pt-[104px]">
-          <NewsDetailsPage id={id} />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (currentPage.startsWith('deposit-details/')) {
-    const id = currentPage.split('/')[1];
-    return (
-      <div className="min-h-screen bg-white">
-        <SEO title="Deposit Product Details" />
-        <Header onNavigate={(page) => setCurrentPage(page)} />
-        <main>
-          <ProductDetailPage id={id} category="deposit" />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (currentPage.startsWith('loan-details/')) {
-    const id = currentPage.split('/')[1];
-    return (
-      <div className="min-h-screen bg-white">
-        <SEO title="Loan Product Details" />
-        <Header onNavigate={(page) => setCurrentPage(page)} />
-        <main>
-          <ProductDetailPage id={id} category="loan" />
-        </main>
-        <Footer />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <SEO {...seoData} />
-      <Header onNavigate={(page) => setCurrentPage(page)} />
-      <main>
-        {currentPage === 'home' ? (
-          <>
-            <HeroSlider />
-            <AboutUsSection />
-            <DICGCSection />
-            <BankingExcellenceSection />
-            <NewsToolsSection />
-            <LatestEventsSection />
-            <GrievanceCTA />
-          </>
-        ) : currentPage === 'about-us' ? (
-          <div className="pt-[104px]">
-            <AboutUsPage />
-          </div>
-        ) : currentPage === 'management' ? (
-          <div className="pt-[104px]">
-            <ManagementPage />
-          </div>
-        ) : currentPage === 'vision-mission' ? (
-          <div className="pt-[104px]">
-            <VisionMissionPage />
-          </div>
-        ) : currentPage === 'contact' ? (
-          <div className="pt-[104px]">
-            <ContactPage />
-          </div>
-        ) : currentPage === 'deaf-accounts' ? (
-          <div className="pt-[104px]">
-            <DeafAccountsPage />
-          </div>
-        ) : currentPage === 'gallery' ? (
-          <div className="pt-[104px]">
-            <GalleryPage />
-          </div>
-        ) : currentPage === 'downloads' ? (
-          <div className="pt-[104px]">
-            <DownloadsPage />
-          </div>
-        ) : currentPage === 'financial-reports' ? (
-          <div className="pt-[104px]">
-            <FinancialReportsPage />
-          </div>
-        ) : currentPage === 'deposits' ? (
-          <div className="pt-[104px]">
-            <DepositsPage />
-          </div>
-        ) : currentPage === 'loans' ? (
-          <div className="pt-[104px]">
-            <LoansPage />
-          </div>
-        ) : currentPage === 'services' ? (
-          <div className="pt-[104px]">
-            <ServicesPage />
-          </div>
-        ) : currentPage === 'news' ? (
-          <div className="pt-[104px]">
-            <NewsPage />
-          </div>
-        ) : (
-          <div className="pt-[104px]">
-            <BranchLocator />
-          </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+    <Suspense fallback={<PageLoader />}>
+      {currentPage === 'admin' && isAuthenticated ? (
+        <AdminDashboard onLogout={handleLogout} />
+      ) : currentPage === 'login' ? (
+        <>
+          <SEO title="Admin Login" description="Secure access to the Urban Bank Administration Panel." />
+          <LoginPage onLoginSuccess={handleLoginSuccess} />
+        </>
+      ) : currentPage.startsWith('news-details/') ? (
+        <div className="min-h-screen bg-white">
+          <SEO title="News & Events" />
+          <Header onNavigate={handleNavigate} />
+          <main className="pt-[104px]">
+            <NewsDetailsPage id={currentPage.split('/')[1]} />
+          </main>
+          <Footer />
+        </div>
+      ) : currentPage.startsWith('deposit-details/') ? (
+        <div className="min-h-screen bg-white">
+          <SEO title="Deposit Product Details" />
+          <Header onNavigate={handleNavigate} />
+          <main>
+            <ProductDetailPage id={currentPage.split('/')[1]} category="deposit" />
+          </main>
+          <Footer />
+        </div>
+      ) : currentPage.startsWith('loan-details/') ? (
+        <div className="min-h-screen bg-white">
+          <SEO title="Loan Product Details" />
+          <Header onNavigate={handleNavigate} />
+          <main>
+            <ProductDetailPage id={currentPage.split('/')[1]} category="loan" />
+          </main>
+          <Footer />
+        </div>
+      ) : (
+        <div className="min-h-screen bg-white">
+          <SEO {...seoData} />
+          <Header onNavigate={handleNavigate} />
+          <main>
+            {currentPage === 'home' ? (
+              <>
+                <HeroSlider />
+                <AboutUsSection />
+                <BankingExcellenceSection />
+                <NewsToolsSection />
+                <LatestEventsSection />
+                <GrievanceCTA />
+              </>
+            ) : currentPage === 'about-us' ? (
+              <div className="pt-[104px]">
+                <AboutUsPage />
+              </div>
+            ) : currentPage === 'management' ? (
+              <div className="pt-[104px]">
+                <ManagementPage />
+              </div>
+            ) : currentPage === 'vision-mission' ? (
+              <div className="pt-[104px]">
+                <VisionMissionPage />
+              </div>
+            ) : currentPage === 'contact' ? (
+              <div className="pt-[104px]">
+                <ContactPage />
+              </div>
+            ) : currentPage === 'deaf-accounts' ? (
+              <div className="pt-[104px]">
+                <DeafAccountsPage />
+              </div>
+            ) : currentPage === 'gallery' ? (
+              <div className="pt-[104px]">
+                <GalleryPage />
+              </div>
+            ) : currentPage === 'downloads' ? (
+              <div className="pt-[104px]">
+                <DownloadsPage />
+              </div>
+            ) : currentPage === 'financial-reports' ? (
+              <div className="pt-[104px]">
+                <FinancialReportsPage />
+              </div>
+            ) : currentPage === 'deposits' ? (
+              <div className="pt-[104px]">
+                <DepositsPage />
+              </div>
+            ) : currentPage === 'loans' ? (
+              <div className="pt-[104px]">
+                <LoansPage />
+              </div>
+            ) : currentPage === 'services' ? (
+              <div className="pt-[104px]">
+                <ServicesPage />
+              </div>
+            ) : currentPage === 'news' ? (
+              <div className="pt-[104px]">
+                <NewsPage />
+              </div>
+            ) : (
+              <div className="pt-[104px]">
+                <BranchLocator />
+              </div>
+            )}
+          </main>
+          <Footer />
+        </div>
+      )}
+    </Suspense>
   );
 }
 

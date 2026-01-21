@@ -394,7 +394,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
 
                                                         try {
                                                             const toastId = toast.loading('Uploading file...');
-                                                            const response = await client.post('/uploads/document', form, {
+                                                            const response = await client.post('uploads/document', form, {
                                                                 headers: {
                                                                     'Content-Type': 'multipart/form-data',
                                                                 },

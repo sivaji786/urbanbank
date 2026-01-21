@@ -23,7 +23,7 @@ export function NewsPage() {
 
     const fetchNews = async () => {
         try {
-            const response = await client.get('/news');
+            const response = await client.get('news');
             // Sort by date desc
             const sorted = response.data.sort((a: NewsItem, b: NewsItem) =>
                 new Date(b.date).getTime() - new Date(a.date).getTime()

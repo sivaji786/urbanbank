@@ -17,7 +17,7 @@ export function LatestEventsSection() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await client.get('/events');
+        const response = await client.get('events');
         const formattedEvents = response.data.map((item: any) => ({
           id: item.id,
           date: new Date(item.date).toLocaleDateString(),

@@ -30,7 +30,7 @@ export function DeafAccountsPage() {
   useEffect(() => {
     const fetchPageData = async () => {
       try {
-        const pageResponse = await client.get('/pages/deaf-accounts');
+        const pageResponse = await client.get('pages/deaf-accounts');
 
         // Process Page Content
         if (pageResponse.data && pageResponse.data.content) {
@@ -66,7 +66,7 @@ export function DeafAccountsPage() {
     setHasSearched(true);
     try {
       // Pass search term to API as query parameter
-      const response = await client.get('/deaf-accounts', {
+      const response = await client.get('deaf-accounts', {
         params: {
           search: trimmedSearch
         }

@@ -18,89 +18,117 @@ import {
 import client, { API_BASE_URL } from '../../api/client';
 import { ImageSelector } from './ImageSelector';
 
-interface GalleryItem {
+interface GalleryImage {
+  id: number;
+  gallery_id: number;
+  image_url: string;
+}
+
+interface Gallery {
   id: number;
   title: string;
-  image_url: string;
-  category: string;
+  description: string;
+  images: GalleryImage[];
 }
 
 export function GalleryManagement() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+  const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [view, setView] = useState<'list' | 'form' | 'image-selection'>('list');
-  const [currentItem, setCurrentItem] = useState<GalleryItem | null>(null);
-  const [formData, setFormData] = useState<Partial<GalleryItem>>({});
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; itemId: number | null }>({
+  const [currentGallery, setCurrentGallery] = useState<Gallery | null>(null);
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    images: string[];
+  }>({
+    title: '',
+    description: '',
+    images: [],
+  });
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ isOpen: boolean; galleryId: number | null }>({
     isOpen: false,
-    itemId: null,
+    galleryId: null,
   });
 
   useEffect(() => {
-    fetchItems();
+    fetchGalleries();
   }, []);
 
-  const fetchItems = async () => {
+  const fetchGalleries = async () => {
     setIsLoading(true);
     try {
-      const response = await client.get('/gallery');
-      setItems(response.data);
+      const response = await client.get('gallery');
+      setGalleries(response.data);
     } catch (error) {
-      console.error('Failed to fetch gallery items', error);
+      console.error('Failed to fetch galleries', error);
     }
     setIsLoading(false);
   };
 
   const handleDeleteClick = (id: number) => {
-    setDeleteConfirmation({ isOpen: true, itemId: id });
+    setDeleteConfirmation({ isOpen: true, galleryId: id });
   };
 
   const confirmDelete = async () => {
-    if (!deleteConfirmation.itemId) return;
+    if (!deleteConfirmation.galleryId) return;
 
     try {
-      await client.delete(`/gallery/${deleteConfirmation.itemId}`);
-      fetchItems();
+      await client.delete(`/gallery/${deleteConfirmation.galleryId}`);
+      fetchGalleries();
     } catch (error) {
-      console.error('Failed to delete item', error);
+      console.error('Failed to delete gallery', error);
     } finally {
-      setDeleteConfirmation({ isOpen: false, itemId: null });
+      setDeleteConfirmation({ isOpen: false, galleryId: null });
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (currentItem) {
-        await client.put(`/gallery/${currentItem.id}`, formData);
+      if (currentGallery) {
+        await client.put(`/gallery/${currentGallery.id}`, formData);
       } else {
-        await client.post('/gallery', formData);
+        await client.post('gallery', formData);
       }
       setView('list');
-      fetchItems();
-      setFormData({});
-      setCurrentItem(null);
+      fetchGalleries();
+      setFormData({ title: '', description: '', images: [] });
+      setCurrentGallery(null);
     } catch (error) {
-      console.error('Failed to save item', error);
+      console.error('Failed to save gallery', error);
     }
   };
 
-  const openEditForm = (item: GalleryItem) => {
-    setCurrentItem(item);
-    setFormData(item);
+  const openEditForm = (gallery: Gallery) => {
+    setCurrentGallery(gallery);
+    setFormData({
+      title: gallery.title,
+      description: gallery.description || '',
+      images: gallery.images.map(img => img.image_url),
+    });
     setView('form');
   };
 
   const openCreateForm = () => {
-    setCurrentItem(null);
-    setFormData({});
+    setCurrentGallery(null);
+    setFormData({ title: '', description: '', images: [] });
     setView('form');
   };
 
-  const handleImageSelect = (url: string) => {
-    setFormData({ ...formData, image_url: url });
+  const handleImageSelect = (url: string | string[]) => {
+    if (Array.isArray(url)) {
+      setFormData({ ...formData, images: [...formData.images, ...url] });
+    } else {
+      setFormData({ ...formData, images: [...formData.images, url] });
+    }
     setView('form');
+  };
+
+  const removeImage = (index: number) => {
+    const newImages = [...formData.images];
+    newImages.splice(index, 1);
+    setFormData({ ...formData, images: newImages });
   };
 
   const getImageUrl = (url: string) => {
@@ -109,9 +137,8 @@ export function GalleryManagement() {
     return `${new URL(API_BASE_URL).origin}/${url}`;
   };
 
-  const filteredItems = items.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredGalleries = galleries.filter((gallery) =>
+    gallery.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -125,7 +152,7 @@ export function GalleryManagement() {
             </div>
             <Button onClick={openCreateForm} className="bg-[#0099ff] hover:bg-[#0077cc]">
               <Plus className="w-4 h-4 mr-2" />
-              Add Photo
+              Add New Gallery
             </Button>
           </div>
 
@@ -141,45 +168,51 @@ export function GalleryManagement() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {isLoading ? (
               <div className="col-span-full text-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0099ff] mx-auto mb-4"></div>
-                <p>Loading gallery...</p>
+                <p>Loading galleries...</p>
               </div>
-            ) : filteredItems.length === 0 ? (
+            ) : filteredGalleries.length === 0 ? (
               <div className="col-span-full text-center py-12 bg-white rounded-lg border border-dashed border-gray-300">
                 <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 mb-2">No photos found</p>
+                <p className="text-gray-500 mb-2">No galleries found</p>
                 <Button variant="link" onClick={openCreateForm} className="text-[#0099ff]">
-                  Add your first photo
+                  Create your first gallery
                 </Button>
               </div>
             ) : (
-              filteredItems.map((item) => (
+              filteredGalleries.map((gallery) => (
                 <div
-                  key={item.id}
+                  key={gallery.id}
                   className="group relative bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col"
                 >
                   <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100 relative">
-                    <img
-                      src={getImageUrl(item.image_url)}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                    {gallery.images.length > 0 ? (
+                      <img
+                        src={getImageUrl(gallery.images[0].image_url)}
+                        alt={gallery.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                        <ImageIcon className="w-12 h-12 text-gray-200" />
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="flex gap-3">
                         <Button
                           size="icon"
                           className="h-10 w-10 bg-white text-gray-900 hover:bg-gray-100 hover:text-[#0099ff] shadow-lg transform transition-transform hover:scale-110"
-                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); openEditForm(item); }}
+                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); openEditForm(gallery); }}
                         >
                           <Edit className="w-5 h-5" />
                         </Button>
                         <Button
                           size="icon"
                           className="h-10 w-10 bg-white text-gray-900 hover:bg-gray-100 hover:text-red-600 shadow-lg transform transition-transform hover:scale-110"
-                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDeleteClick(item.id); }}
+                          onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDeleteClick(gallery.id); }}
                         >
                           <Trash2 className="w-5 h-5" />
                         </Button>
@@ -187,14 +220,17 @@ export function GalleryManagement() {
                     </div>
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-white/90 text-gray-800 hover:bg-white backdrop-blur-sm shadow-sm">
-                        {item.category}
+                        {gallery.images.length} {gallery.images.length === 1 ? 'Image' : 'Images'}
                       </Badge>
                     </div>
                   </div>
                   <div className="p-4 flex-1 flex flex-col">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1" title={item.title}>
-                      {item.title}
+                    <h3 className="font-bold text-gray-900 line-clamp-1 mb-1" title={gallery.title}>
+                      {gallery.title}
                     </h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 italic">
+                      {gallery.description || 'No description'}
+                    </p>
                   </div>
                 </div>
               ))
@@ -213,6 +249,7 @@ export function GalleryManagement() {
             <ImageSelector
               onSelect={handleImageSelect}
               onCancel={() => setView('form')}
+              multiple={true}
             />
           </Card>
         </div>
@@ -223,17 +260,17 @@ export function GalleryManagement() {
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <h2 className="text-2xl font-bold text-gray-900">
-              {currentItem ? 'Edit Photo' : 'Add New Photo'}
+              {currentGallery ? 'Edit Gallery' : 'Create Gallery'}
             </h2>
           </div>
 
           <Card className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="title" className="mb-2 block">Title</Label>
+                <Label htmlFor="title" className="mb-2 block">Gallery Title</Label>
                 <Input
                   id="title"
-                  value={formData.title || ''}
+                  value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
                   placeholder="e.g. Annual General Meeting 2024"
@@ -241,54 +278,66 @@ export function GalleryManagement() {
               </div>
 
               <div>
-                <Label htmlFor="category" className="mb-2 block">Category</Label>
-                <Input
-                  id="category"
-                  value={formData.category || ''}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  required
-                  placeholder="e.g. Events, Awards, Office"
+                <Label htmlFor="description" className="mb-2 block">Description</Label>
+                <textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full min-h-[100px] p-3 rounded-md border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0099ff]/10 focus:border-[#0099ff] transition-all"
+                  placeholder="Enter a brief description of this gallery..."
                 />
               </div>
 
               <div>
-                <Label className="mb-2 block">Image</Label>
-                <div className="space-y-4">
-                  {formData.image_url && (
-                    <div className="aspect-video w-full relative rounded-lg overflow-hidden border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="block">Gallery Images</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setView('image-selection')}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Image
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {formData.images.map((url, index) => (
+                    <div key={index} className="group relative aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                       <img
-                        src={getImageUrl(formData.image_url)}
-                        alt="Preview"
+                        src={getImageUrl(url)}
+                        alt={`Gallery ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8 rounded-full"
+                          onClick={() => removeImage(index)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {formData.images.length === 0 && (
+                    <div className="col-span-full py-12 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-gray-300 mb-2" />
+                      <p className="text-sm text-gray-500">No images added yet</p>
                     </div>
                   )}
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.image_url || ''}
-                      readOnly
-                      placeholder="No image selected"
-                      className="flex-1 bg-gray-50"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setView('image-selection')}
-                      className="whitespace-nowrap"
-                    >
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Choose Image
-                    </Button>
-                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4">
+              <div className="flex justify-end gap-2 pt-6 border-t">
                 <Button type="button" variant="outline" onClick={() => setView('list')}>
                   Cancel
                 </Button>
                 <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc]">
-                  Save Photo
+                  {currentGallery ? 'Update Gallery' : 'Create Gallery'}
                 </Button>
               </div>
             </form>
@@ -301,7 +350,7 @@ export function GalleryManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the photo from the gallery.
+              This action cannot be undone. This will permanently delete the gallery and all its images.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

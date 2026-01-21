@@ -16,7 +16,7 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-    public string $baseURL = 'https://gcub.digitalks.in/api/public/';
+    public string $baseURL = 'http://127.0.0.1:8080/';
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
@@ -199,4 +199,14 @@ class App extends BaseConfig
      * @see http://www.w3.org/TR/CSP/
      */
     public bool $CSPEnabled = false;
+
+    /**
+     * --------------------------------------------------------------------------
+     * HTTP Response Compression
+     * --------------------------------------------------------------------------
+     *
+     * If true, CodeIgniter will attempt to compress the HTTP response
+     * using Gzip compression if the browser supports it.
+     */
+    public bool $compressHTTPResponse = true;
 }

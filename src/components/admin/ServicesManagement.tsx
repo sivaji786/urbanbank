@@ -77,7 +77,7 @@ export function ServicesManagement() {
         setLoading(true);
         setError(null);
         try {
-            const response = await client.get('/services');
+            const response = await client.get('services');
             setServices(response.data);
         } catch (err) {
             console.error('Failed to fetch services:', err);
@@ -154,7 +154,7 @@ export function ServicesManagement() {
                 await client.put(`/services/${editingItem.id}`, cleanedData);
                 setSuccess('Service updated successfully.');
             } else {
-                await client.post('/services', cleanedData);
+                await client.post('services', cleanedData);
                 setSuccess('Service added successfully.');
             }
             setView('list');

@@ -31,7 +31,7 @@ export function ContactPage() {
 
     setIsSubmitting(true);
     try {
-      await client.post('/contact', formData);
+      await client.post('contact', formData);
       toast.success('Message sent successfully! We will get back to you soon.');
       setFormData({
         name: '',

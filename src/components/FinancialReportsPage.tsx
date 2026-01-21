@@ -9,7 +9,7 @@ export function FinancialReportsPage() {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await client.get('/reports');
+        const response = await client.get('reports');
         const grouped = response.data.reduce((acc: any, item: any) => {
           const year = item.fiscal_year || 'Unknown Year';
           if (!acc[year]) {

@@ -27,7 +27,7 @@ export function BranchLocator() {
   useEffect(() => {
     const fetchBranches = async () => {
       try {
-        const response = await client.get('/branches');
+        const response = await client.get('branches');
         // Backend returns is_headquarter as 0/1 usually, so we map it if needed, or JS treats 1 as truthy.
         // Let's ensure it's handled correctly for the UI which expects boolean
         const data = response.data.map((b: any) => ({

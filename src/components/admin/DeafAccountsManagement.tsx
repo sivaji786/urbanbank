@@ -38,7 +38,7 @@ export default function DeafAccountsManagement() {
   const fetchAccounts = async () => {
     setIsLoading(true);
     try {
-      const response = await client.get('/deaf-accounts');
+      const response = await client.get('deaf-accounts');
       setAccounts(response.data);
     } catch (error) {
       console.error('Failed to fetch accounts', error);
@@ -78,7 +78,7 @@ export default function DeafAccountsManagement() {
       if (editingAccount) {
         await client.put(`/deaf-accounts/${editingAccount.id}`, formData);
       } else {
-        await client.post('/deaf-accounts', formData);
+        await client.post('deaf-accounts', formData);
       }
       setView('list');
       fetchAccounts();

@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          await client.get('/me');
+          await client.get('me');
           setIsAuthenticated(true);
         } catch (error) {
           localStorage.removeItem('token');
@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await client.post('/login', { username, password });
+      const response = await client.post('login', { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       setIsAuthenticated(true);

@@ -38,7 +38,7 @@ export function PageManager() {
 
     const fetchPages = async () => {
         try {
-            const response = await client.get('/pages');
+            const response = await client.get('pages');
             setPages(response.data);
         } catch (err) {
             console.error('Failed to fetch pages', err);

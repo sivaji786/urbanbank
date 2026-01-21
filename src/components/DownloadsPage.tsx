@@ -9,7 +9,7 @@ export function DownloadsPage() {
   useEffect(() => {
     const fetchDownloads = async () => {
       try {
-        const response = await client.get('/downloads');
+        const response = await client.get('downloads');
         const grouped = response.data.reduce((acc: any, item: any) => {
           const category = item.category || 'General';
           if (!acc[category]) {

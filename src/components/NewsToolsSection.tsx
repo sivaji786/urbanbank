@@ -8,7 +8,7 @@ export function NewsToolsSection() {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await client.get('/news');
+        const response = await client.get('news');
         // Sort by date desc and take top 4
         const sorted = response.data
           .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
