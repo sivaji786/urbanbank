@@ -95,7 +95,7 @@ export function BankingExcellenceSection() {
             >
               <CarouselContent className="-ml-6">
                 {services.map((service) => (
-                  <CarouselItem key={service.id} className="pl-6 !basis-full sm:!basis-1/2 md:!basis-1/3 lg:!basis-1/4">
+                  <CarouselItem key={service.id} className="pl-6 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
                     <div className="group bg-white rounded-[2rem] border border-gray-100 overflow-hidden hover:shadow-[0_20px_50px_rgba(0,153,255,0.15)] transition-all duration-500 flex flex-col h-full hover:-translate-y-2">
                       <a
                         href={`#${service.category === 'deposit' ? 'deposit-details' : 'loan-details'}/${service.id}`}
