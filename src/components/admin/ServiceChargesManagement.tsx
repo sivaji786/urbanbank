@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, AlertCircle, Check, Pencil, Loader2, Receipt } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Check, Pencil, Loader2, ArrowLeft, Receipt, Coins, Save, X } from 'lucide-react';
 import { Button } from '../ui/button';
-import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 import { Card } from '../ui/card';
 import {
     Select,
@@ -12,15 +12,9 @@ import {
     SelectValue,
 } from '../ui/select';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '../ui/dialog';
 import client from '../../api/client';
+import { DataTable, Column } from '../ui/DataTable';
+import { cn } from '../ui/utils';
 
 interface ServiceCharge {
     id?: number;
@@ -36,16 +30,14 @@ export function ServiceChargesManagement() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [view, setView] = useState<'list' | 'add' | 'edit'>('list');
     const [editingItem, setEditingItem] = useState<ServiceCharge | null>(null);
-
     const [formData, setFormData] = useState<ServiceCharge>({
         service: '',
         charge: '',
         status: 'active',
         sort_order: 0
     });
-
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -76,7 +68,7 @@ export function ServiceChargesManagement() {
             status: 'active',
             sort_order: serviceCharges.length + 1
         });
-        setIsDialogOpen(true);
+        setView('add');
     };
 
     const handleEdit = (item: ServiceCharge) => {
@@ -84,7 +76,14 @@ export function ServiceChargesManagement() {
         setSuccess(null);
         setError(null);
         setFormData({ ...item });
-        setIsDialogOpen(true);
+        setView('edit');
+    };
+
+    const handleBackToList = () => {
+        setView('list');
+        setEditingItem(null);
+        setSuccess(null);
+        setError(null);
     };
 
     const handleDelete = async (id: number) => {
@@ -114,7 +113,7 @@ export function ServiceChargesManagement() {
                 await client.post('service-charges', formData);
                 setSuccess('Service charge added successfully.');
             }
-            setIsDialogOpen(false);
+            setView('list');
             fetchServiceCharges();
         } catch (err) {
             setError('Failed to save service charge. Please check your inputs.');
@@ -123,178 +122,222 @@ export function ServiceChargesManagement() {
         }
     };
 
-    return (
-        <div className="space-y-5 animate-in fade-in duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-1">
-                <div className="flex-1 min-w-0">
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">Service Charges</h2>
-                    <p className="text-gray-500 mt-1 text-lg">Manage customer service charges</p>
+    const columns: Column<ServiceCharge>[] = [
+        {
+            header: 'Service',
+            cell: (charge) => (
+                <span className="font-bold text-[#0F172A]">{charge.service}</span>
+            )
+        },
+        {
+            header: 'Charge',
+            accessorKey: 'charge',
+            className: 'text-slate-600'
+        },
+        {
+            header: 'Status',
+            cell: (charge) => (
+                <span className={cn(
+                    "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap",
+                    charge.status === 'active'
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                        : "bg-slate-50 text-slate-400 border border-slate-100"
+                )}>
+                    {charge.status}
+                </span>
+            )
+        },
+        {
+            header: 'Order',
+            accessorKey: 'sort_order',
+            className: 'text-center font-medium text-slate-500'
+        },
+        {
+            header: 'Actions',
+            headerClassName: 'text-right',
+            className: 'text-right',
+            cell: (charge) => (
+                <div className="flex items-center justify-end gap-1">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(charge)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-[#0099ff] hover:bg-blue-50"
+                    >
+                        <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(charge.id!)}
+                        className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                    >
+                        <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                 </div>
-                <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-[#0077cc] h-12 px-6 rounded-xl font-bold shadow-lg shadow-blue-500/20 gap-2">
-                    <Plus className="h-5 w-5" />
-                    Add Service Charge
-                </Button>
-            </div>
+            )
+        }
+    ];
 
-            {success && (
-                <Alert className="bg-green-50 border-green-100 text-green-800 rounded-xl shadow-sm">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="font-medium ml-2">{success}</AlertDescription>
-                </Alert>
-            )}
-
-            {error && (
-                <Alert variant="destructive" className="rounded-xl shadow-sm">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle className="font-bold ml-2">Error</AlertTitle>
-                    <AlertDescription className="ml-2">{error}</AlertDescription>
-                </Alert>
-            )}
-
-            {loading ? (
-                <div className="flex flex-col items-center justify-center h-96 gap-4">
-                    <Loader2 className="h-10 w-10 animate-spin text-[#0099ff]" />
-                    <p className="text-gray-400 font-medium">Loading service charges...</p>
+    if (view === 'add' || view === 'edit') {
+        return (
+            <div className="animate-in fade-in duration-500 pb-20 max-w-4xl mx-auto px-4">
+                <div className="flex items-center gap-6 mb-12 mt-4">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleBackToList}
+                        className="h-12 w-12 rounded-full bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-all shrink-0"
+                    >
+                        <ArrowLeft className="h-6 w-6 text-slate-600" />
+                    </Button>
+                    <div>
+                        <h2 className="text-xl font-semibold text-slate-900 leading-tight tracking-tight">
+                            {view === 'edit' ? `Modify Tariff` : 'New Service Charge'}
+                        </h2>
+                        <p className="text-base font-medium text-slate-400 mt-1">Configure institutional tariff and fee parameters</p>
+                    </div>
                 </div>
-            ) : (
-                <Card className="p-6 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
-                    {serviceCharges.length === 0 ? (
-                        <div className="text-center py-20">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Receipt className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No service charges found</h3>
-                            <p className="text-gray-500 mb-6">Get started by creating your first service charge.</p>
-                            <Button onClick={handleAdd} variant="outline" className="h-10 border-gray-300">
-                                Create New Service Charge
-                            </Button>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b-2 border-[#0099ff]">
-                                        <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">Service</th>
-                                        <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">Charge</th>
-                                        <th className="text-left py-3 px-4 text-sm font-bold text-gray-700">Status</th>
-                                        <th className="text-center py-3 px-4 text-sm font-bold text-gray-700">Order</th>
-                                        <th className="text-right py-3 px-4 text-sm font-bold text-gray-700">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {serviceCharges.map((charge) => (
-                                        <tr key={charge.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                                            <td className="py-3 px-4 text-sm text-gray-900 font-medium">{charge.service}</td>
-                                            <td className="py-3 px-4 text-sm text-gray-900">{charge.charge}</td>
-                                            <td className="py-3 px-4">
-                                                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${charge.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                                    {charge.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-3 px-4 text-center text-sm text-gray-600">{charge.sort_order}</td>
-                                            <td className="py-3 px-4">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleEdit(charge)}
-                                                        className="h-8 px-3 text-[#0099ff] hover:text-[#0077cc] hover:bg-blue-50"
-                                                    >
-                                                        <Pencil className="h-4 w-4 mr-1" />
-                                                        Edit
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => handleDelete(charge.id!)}
-                                                        className="h-8 px-3 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                    >
-                                                        <Trash2 className="h-4 w-4 mr-1" />
-                                                        Delete
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </Card>
-            )}
 
-            {/* Add/Edit Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle>{editingItem ? 'Edit Service Charge' : 'Add Service Charge'}</DialogTitle>
-                        <DialogDescription>
-                            {editingItem ? 'Update the service charge details below.' : 'Fill in the details to create a new service charge.'}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleSubmit}>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="service">Service Name</Label>
-                                <Input
-                                    id="service"
-                                    value={formData.service}
-                                    onChange={e => setFormData({ ...formData, service: e.target.value })}
-                                    placeholder="e.g. Cheque Book (10 leaves)"
-                                    required
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="charge">Charge Amount</Label>
-                                <Input
-                                    id="charge"
-                                    value={formData.charge}
-                                    onChange={e => setFormData({ ...formData, charge: e.target.value })}
-                                    placeholder="e.g. ₹50 + GST or Free"
-                                    required
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select value={formData.status} onValueChange={(val: any) => setFormData({ ...formData, status: val })}>
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                <form onSubmit={handleSubmit} className="animate-in slide-in-from-bottom-8 duration-700">
+                    <Card className="overflow-hidden border-slate-200 rounded-2xl bg-white">
+                        <div className="p-6 border-b border-slate-50">
+                            <div className="flex items-center gap-5 mb-12">
+                                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                    <Receipt className="w-7 h-7 text-[#0099ff]" />
                                 </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="sort_order">Sort Order</Label>
+                                <div className="px-2">
+                                    <h3 className="text-xl font-bold text-slate-900 leading-tight">Tariff Details</h3>
+                                    <p className="text-md font-semibold text-gray-400 tracking-[0.2em] mt-1.5">Official service charge configuration</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 gap-y-2">
+                                <div className="space-y-3 md:col-span-2 mb-4">
+                                    <Label htmlFor="service" className="text-sm font-semibold text-slate-500 uppercase tracking-widest ml-1">Service Nomenclature</Label>
+                                    <Input
+                                        id="service"
+                                        value={formData.service}
+                                        onChange={e => setFormData({ ...formData, service: e.target.value })}
+                                        placeholder="e.g. International Wire Transfer"
+                                        className="h-12 text-lg px-8 rounded-2xl border-slate-200 focus-visible:ring-[#0099ff]/20 focus-visible:border-[#0099ff] bg-slate-50/50 transition-all font-medium placeholder:text-slate-300"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="space-y-2 px-2">
+                                    <Label htmlFor="charge" className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Tariff Amount</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="charge"
+                                            value={formData.charge}
+                                            onChange={e => setFormData({ ...formData, charge: e.target.value })}
+                                            placeholder="e.g. ₹250 + GST"
+                                            className="h-12 pl-[12px] pr-8 text-md rounded-2xl border-slate-200 focus-visible:ring-[#0099ff]/20 focus-visible:border-[#0099ff] bg-slate-50/50 transition-all font-semibold placeholder:text-slate-300"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="sort_order" className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Display Priority</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
                                         value={formData.sort_order}
                                         onChange={e => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                                        className="h-12 px-8 text-lg rounded-2xl border-slate-200 focus-visible:ring-[#0099ff]/20 focus-visible:border-[#0099ff] bg-slate-50/50 transition-all font-medium"
                                     />
+                                </div>
+
+                                <div className="space-y-3 md:col-span-2 mt-4">
+                                    <Label htmlFor="status" className="text-sm font-semibold text-slate-500 uppercase tracking-widest ml-1">Deployment Status</Label>
+                                    <Select value={formData.status} onValueChange={(val: any) => setFormData({ ...formData, status: val })}>
+                                        <SelectTrigger className="h-12 px-8 text-md rounded-2xl border-slate-200 focus:ring-[#0099ff]/20 bg-slate-50/50 font-medium transition-all">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="rounded-2xl border-slate-200 shadow-2xl p-2">
+                                            <SelectItem value="active" className="rounded-xl h-12 transition-colors focus:bg-emerald-50 focus:text-emerald-700">Operational (Active)</SelectItem>
+                                            <SelectItem value="inactive" className="rounded-xl h-12 transition-colors focus:bg-slate-100 focus:text-slate-700">Restricted (Inactive)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={submitting}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc]" disabled={submitting}>
-                                {submitting ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...
-                                    </>
-                                ) : (
-                                    editingItem ? 'Update' : 'Create'
-                                )}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+
+                        <div className="px-6 py-2 bg-slate-50/80 flex flex-col sm:flex-row items-center justify-between gap-8 pb-4">
+                            <div className="flex items-center gap-4 text-slate-400 group">
+                                <div className="p-2 bg-white rounded-lg border border-slate-200 group-hover:border-blue-200 transition-colors">
+                                    <AlertCircle className="w-5 h-5 text-slate-400 group-hover:text-[#0099ff]" />
+                                </div>
+                                <span className="text-sm font-semibold uppercase tracking-[0.15em] leading-tight max-w-[200px]">Review all figures before committing</span>
+                            </div>
+                            <div className="flex items-center gap-5 w-full sm:w-auto">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={handleBackToList}
+                                    className="h-12 px-10 rounded-2xl text-xs font-semibold border-2 border-slate-200 mr-2 text-slate-400 hover:text-slate-600 hover:bg-white transition-all flex-1 sm:flex-none uppercase tracking-[0.2em]"
+                                >
+                                    Discard
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    className="bg-[#0099ff] hover:bg-black h-12 px-14 rounded-2xl text-xs font-semibold uppercase tracking-[0.25em] shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex-1 sm:flex-none text-white"
+                                    disabled={submitting}
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-6 h-6 animate-spin mr-3" /> COMMITTING...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-6 h-6 mr-3" /> {view === 'edit' ? 'Update Tariff' : 'Commit Charge'}
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </Card>
+                </form>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4 animate-in fade-in duration-300 mb-4 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-4">
+                <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tighter leading-tight font-['Poppins']">Service Charges</h2>
+                    <p className="text-sm font-black text-slate-400 tracking-widest mt-1">Commercial tariff and fee protocol</p>
+                </div>
+                <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-black text-sm font-semibold px-6 h-10 rounded-xl shadow-md uppercase tracking-[0.2em] transition-all duration-300 gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Service Charge
+                </Button>
+            </div>
+
+            {success && (
+                <Alert className="bg-green-50 border-green-100 text-green-800 rounded-xl shadow-sm py-2 px-4 mb-4">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-xs font-bold ml-2 uppercase tracking-wide">{success}</AlertDescription>
+                </Alert>
+            )}
+
+            {error && (
+                <Alert variant="destructive" className="rounded-xl shadow-sm py-2 px-4 mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs font-bold ml-2 uppercase tracking-wide">{error}</AlertDescription>
+                </Alert>
+            )}
+
+            <DataTable
+                data={serviceCharges}
+                columns={columns}
+                isLoading={loading}
+                searchPlaceholder="Search charges..."
+                emptyMessage="No service charges found."
+            />
         </div>
     );
 }

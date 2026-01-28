@@ -121,14 +121,14 @@ export function NewsManagement() {
     <div className="space-y-4">
       {view === 'list' ? (
         <>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3 mb-6">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900">Latest News Management</h2>
-              <p className="text-sm text-gray-500 mt-1">Manage news and announcements displayed on the website</p>
+              <h2 className="text-[28px] font-black text-gray-900 tracking-tighter leading-tight font-['Poppins']">News & Announcements</h2>
+              <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Corporate intelligence protocol</p>
             </div>
-            <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-[#0077cc] gap-2">
-              <Plus className="h-4 w-4" />
-              Add News
+            <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-black text-[9px] font-black px-6 h-10 rounded-xl shadow-md uppercase tracking-[0.2em] transition-all duration-300">
+              <Plus className="w-4 h-4 mr-2" />
+              PROVISION NEWS
             </Button>
           </div>
 
@@ -155,29 +155,29 @@ export function NewsManagement() {
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {news.length === 0 ? (
-                <Card className="p-5 text-center text-gray-500">
-                  <p>No news items found. Click "Add News" to create one.</p>
+                <Card className="p-8 text-center text-[#94A3B8] border-dashed border-2 border-blue-50 bg-blue-50/5 rounded-2xl">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em]">Zero news entries detected</p>
                 </Card>
               ) : (
                 news.map((item) => (
-                  <Card key={item.id} className="p-4 hover:shadow-md transition-shadow group border-gray-200">
+                  <Card key={item.id} className="p-4 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-500 group border-[#F1F5F9] rounded-2xl bg-white">
                     <div className="flex items-start gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-lg font-semibold text-gray-900 truncate">{item.title}</h3>
-                          <span className="text-xs font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                            {new Date(item.date).toLocaleDateString()}
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-lg font-black text-gray-900 tracking-tight leading-tight group-hover:text-[#0099ff] transition-colors font-['Poppins']">{item.title}</h3>
+                          <span className="text-[9px] font-black text-[#94A3B8] bg-[#F8FAFC] px-2.5 py-1 rounded-full border border-[#F1F5F9] uppercase tracking-[0.1em]">
+                            {new Date(item.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
                         </div>
-                        <div className="prose prose-sm max-w-none text-gray-600 line-clamp-3 mb-1 whitespace-pre-wrap">
-                          {item.content || <span className="text-gray-400 italic font-normal">No content available</span>}
+                        <div className="prose prose-sm max-w-none text-slate-600 line-clamp-2 text-[13px] leading-relaxed mb-0 whitespace-pre-wrap">
+                          {item.content || <span className="text-slate-400 italic font-normal">No content available</span>}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-gray-500 hover:text-[#0099ff] hover:bg-blue-50"
+                          className="h-9 w-9 text-[#64748B] hover:text-[#0099ff] hover:bg-blue-50 rounded-xl transition-all shadow-sm border border-transparent hover:border-blue-100"
                           onClick={() => handleEdit(item)}
                         >
                           <Edit className="h-4 w-4" />
@@ -185,7 +185,7 @@ export function NewsManagement() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          className="h-9 w-9 text-[#64748B] hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm border border-transparent hover:border-red-100"
                           onClick={() => handleDelete(item.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -199,65 +199,65 @@ export function NewsManagement() {
           )}
         </>
       ) : (
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="icon" onClick={() => setView('list')} className="rounded-full">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <Button variant="ghost" size="icon" onClick={() => setView('list')} className="h-10 w-10 rounded-full hover:bg-gray-100">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <h2 className="text-2xl font-bold text-gray-900">
-              {editingItem ? 'Edit News Item' : 'Add New News Item'}
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight font-['Poppins']">
+              {editingItem ? 'Edit Corporate Insight' : 'Provision New Insight'}
             </h2>
           </div>
 
-          <Card className="p-5">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-gray-700">News Title</Label>
+          <Card className="p-6 border-[#F1F5F9] rounded-2xl shadow-sm bg-white">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-6">
+                <div className="space-y-1.5">
+                  <Label htmlFor="title" className="text-[10px] font-black text-gray-400 uppercase tracking-widest">INSIGHT TITLE</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter news title"
+                    placeholder="ENTER HEADLINE..."
                     required
-                    className="focus-visible:ring-[#0099ff]"
+                    className="h-10 text-xs font-bold border-[#E5E7EB] rounded-xl focus:ring-[#0099ff]/10"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date" className="text-gray-700">Publication Date</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="date" className="text-[10px] font-black text-gray-400 uppercase tracking-widest">PUBLICATION PROTOCOL DATE</Label>
                   <Input
                     id="date"
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
-                    className="focus-visible:ring-[#0099ff]"
+                    className="h-10 text-xs font-bold border-[#E5E7EB] rounded-xl focus:ring-[#0099ff]/10"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="content" className="text-gray-700">News Content</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="content" className="text-[10px] font-black text-gray-400 uppercase tracking-widest">NARRATIVE CONTENT</Label>
                   <Textarea
                     id="content"
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Write your news article here..."
-                    rows={10}
+                    placeholder="DOCUMENT THE NARRATIVE..."
+                    rows={8}
                     required
-                    className="min-h-[200px] focus-visible:ring-[#0099ff]"
+                    className="min-h-[200px] text-xs font-medium border-[#E5E7EB] rounded-xl leading-relaxed focus:ring-[#0099ff]/10"
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <Button type="button" variant="outline" onClick={() => setView('list')}>
-                  Cancel
+              <div className="flex justify-end gap-3 pt-6 border-t border-[#F1F5F9] mt-6">
+                <Button type="button" variant="outline" onClick={() => setView('list')} className="h-10 px-6 border-[#E5E7EB] rounded-xl text-gray-500 font-black text-[9px] uppercase tracking-[0.2em] hover:bg-gray-50 transition-all">
+                  ABORT TRANSACTION
                 </Button>
-                <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc] min-w-[140px]" disabled={submitting}>
+                <Button type="submit" className="bg-[#0099ff] hover:bg-black h-10 px-8 rounded-xl text-white font-black text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-blue-100 transition-all duration-300" disabled={submitting}>
                   {submitting ? (
-                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    <div className="animate-spin h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full" />
                   ) : (
                     <>
-                      <Save className="w-4 h-4 mr-2" />
-                      {editingItem ? 'Update News' : 'Publish News'}
+                      <Save className="w-3.5 h-3.5 mr-2" />
+                      {editingItem ? 'COMMIT UPDATE' : 'PUBLISH INSIGHT'}
                     </>
                   )}
                 </Button>

@@ -1,23 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Image as ImageIcon, X, ChevronLeft, ChevronRight, Maximize2, ArrowLeft } from 'lucide-react';
+import { Image as ImageIcon, X, ChevronLeft, ChevronRight, Maximize2, ArrowLeft, Loader2 } from 'lucide-react';
 
 export function GalleryPage() {
   const [galleries, setGalleries] = useState<any[]>([]);
   const [lightbox, setLightbox] = useState<{ galleryId: number, index: number } | null>(null);
   const [selectedGallery, setSelectedGallery] = useState<any | null>(null);
+  const [pageContent, setPageContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchGalleries = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await client.get('gallery');
-        setGalleries(response.data);
+        const [galleryRes, pageRes] = await Promise.all([
+          client.get('gallery'),
+          client.get('pages/gallery')
+        ]);
+        setGalleries(galleryRes.data);
+        if (pageRes.data && pageRes.data.content) {
+          setPageContent(pageRes.data.content);
+        }
       } catch (error) {
-        console.error('Failed to fetch gallery', error);
+        console.error('Failed to fetch gallery data', error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchGalleries();
+    fetchData();
   }, []);
 
   const openLightbox = (galleryId: number, index: number) => {
@@ -75,11 +86,19 @@ export function GalleryPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightbox, closeLightbox, handleNext, handlePrev]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0099ff]" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
           {selectedGallery && (
             <button
               onClick={closeGalleryDetails}
@@ -89,18 +108,18 @@ export function GalleryPage() {
               Back to Galleries
             </button>
           )}
-          <h1 className="text-4xl lg:text-5xl mb-4">{selectedGallery ? selectedGallery.title : 'Photo Gallery'}</h1>
+          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">{selectedGallery ? selectedGallery.title : (pageContent?.hero_title || 'Photo Gallery')}</h1>
           <p className="text-xl text-white/90 max-w-3xl">
             {selectedGallery
               ? selectedGallery.description || 'View all photos from this gallery'
-              : 'Explore memorable moments and milestones from Guntur Cooperative Urban Bank\'s journey of excellence and community service.'}
+              : (pageContent?.hero_description || 'Explore memorable moments and milestones from Guntur Cooperative Urban Bank\'s journey of excellence and community service.')}
           </p>
         </div>
       </div>
 
       {/* Gallery Details View */}
       {selectedGallery ? (
-        <div className="max-w-[1400px] mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {selectedGallery.images.map((image: any, index: number) => (
               <div
@@ -124,7 +143,7 @@ export function GalleryPage() {
         </div>
       ) : (
         /* Gallery Cards Grid */
-        <div className="max-w-[1400px] mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {galleries.map((gallery) => (
               <div

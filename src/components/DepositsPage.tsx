@@ -349,18 +349,18 @@ export function DepositsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
           <h1 className="text-4xl lg:text-5xl mb-4 font-bold">Deposit Schemes</h1>
-          <p className="text-xl text-white/90 max-w-3xl">
+          <p className="text-md text-white/90 max-w-3xl">
             Secure your future with our range of flexible and high-yield deposit options designed for every need.
           </p>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Product Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {products.map((deposit) => {
             const Icon = iconMap[deposit.icon] || Wallet;
             return (
@@ -368,10 +368,10 @@ export function DepositsPage() {
                 key={deposit.id}
                 className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#0099ff]/30 group"
               >
-                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block mb-6 group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300 overflow-hidden w-16 h-16 shrink-0 flex items-center justify-center">
+                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300 overflow-hidden w-16 h-16 shrink-0 flex items-center justify-center">
                   <Icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{deposit.title}</h3>
+                <h3 className="text-2xl font-semibold text-[#0099ff]">{deposit.title}</h3>
 
                 {/* Product Image after title */}
                 {deposit.image_url && (
@@ -384,9 +384,9 @@ export function DepositsPage() {
                   </div>
                 )}
 
-                <p className="text-gray-600 mb-6 line-clamp-3 text-sm leading-relaxed h-[4.5rem]">{deposit.description}</p>
+                <p className="text-gray-600 mb-3 line-clamp-3 text-sm leading-relaxed h-[4.5rem]">{deposit.description}</p>
 
-                <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-xl flex items-center justify-between">
+                <div className="mb-2 p-4 bg-green-50 border border-green-100 rounded-xl flex items-center justify-between">
                   <div>
                     <p className="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">Interest Rate</p>
                     <p className="text-xl font-black text-green-700">{deposit.summary_rate}</p>
@@ -394,9 +394,9 @@ export function DepositsPage() {
                   <TrendingUp className="w-6 h-6 text-green-500 opacity-50" />
                 </div>
 
-                <ul className="space-y-3 mb-8 h-40 overflow-hidden">
+                <ul className="space-y-2 h-40 overflow-hidden">
                   {deposit.features.slice(0, 4).map((feature, featureIdx) => (
-                    <li key={featureIdx} className="flex items-start gap-3 text-sm text-gray-700 font-medium">
+                    <li key={featureIdx} className="flex items-start gap-2 text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-5 h-5 text-[#0099ff] shrink-0" />
                       <span>{feature}</span>
                     </li>

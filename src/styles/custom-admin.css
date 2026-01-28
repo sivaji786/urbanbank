@@ -1,0 +1,10 @@
+/* Custom CSS for Admin Panel (Backend) */
+/* Add your custom admin styles here */
+
+textarea {
+    min-height: 120px !important;
+}
+
+.admin-custom-class {
+    /* Example */
+}

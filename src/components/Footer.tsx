@@ -96,7 +96,7 @@ export function Footer() {
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       {/* Main Footer */}
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-8 mb-10">
           {/* Brand */}
           <div className="lg:col-span-4">
@@ -226,6 +226,7 @@ export function Footer() {
             </p>
           </div>
           <div className="flex gap-4">
+            <button onClick={() => window.location.hash = '#login'} className="hover:text-white transition-colors">Admin Login</button>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="/api/index.php/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Sitemap</a>

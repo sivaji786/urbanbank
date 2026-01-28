@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../styles/custom-admin.css';
 import { LogIn, Mail, Lock, Eye, EyeOff, Zap } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';

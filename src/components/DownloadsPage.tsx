@@ -1,16 +1,42 @@
-import { useState, useEffect } from 'react';
-import client from '../api/client';
-import { Download, FileText, File, CalendarDays } from 'lucide-react';
+import { Download, FileText, File, CalendarDays, Eye } from 'lucide-react';
 import { Button } from './ui/button';
+import { useState, useEffect } from 'react';
+import client, { getFullUrl } from '../api/client';
 
 export function DownloadsPage() {
   const [downloadCategories, setDownloadCategories] = useState<any[]>([]);
+  const [pageContent, setPageContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const fullUrl = getFullUrl(url);
+      const response = await fetch(fullUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename.toLowerCase().endsWith('.pdf') ? filename : `${filename}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+      window.open(getFullUrl(url), '_blank');
+    }
+  };
 
   useEffect(() => {
-    const fetchDownloads = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await client.get('downloads');
-        const grouped = response.data.reduce((acc: any, item: any) => {
+        const [downloadsRes, pageRes] = await Promise.all([
+          client.get('downloads'),
+          client.get('pages/downloads')
+        ]);
+
+        const grouped = downloadsRes.data.reduce((acc: any, item: any) => {
           const category = item.category || 'General';
           if (!acc[category]) {
             acc[category] = {
@@ -29,26 +55,41 @@ export function DownloadsPage() {
           return acc;
         }, {});
         setDownloadCategories(Object.values(grouped));
+
+        if (pageRes.data && pageRes.data.content) {
+          setPageContent(pageRes.data.content);
+        }
       } catch (error) {
-        console.error('Failed to fetch downloads', error);
+        console.error('Failed to fetch downloads data', error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchDownloads();
+    fetchData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#0099ff] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h1 className="text-4xl lg:text-5xl mb-4">Downloads</h1>
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
+          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">{pageContent?.hero_title || 'Financial & Annual Reports'}</h1>
           <p className="text-xl text-white/90 max-w-3xl">
-            Access important forms, applications, reports, and documents for all your banking needs.
+            {pageContent?.hero_description || 'Access our comprehensive financial reports, annual statements, and performance data demonstrating our commitment to transparency and excellence.'}
           </p>
         </div>
       </div>
 
       {/* Downloads Content */}
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="space-y-8">
           {downloadCategories.map((category, idx) => (
             <div key={idx} className="bg-white rounded-xl shadow-md p-8">
@@ -84,13 +125,25 @@ export function DownloadsPage() {
                         </div>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      className="bg-[#0099ff] hover:bg-[#0088ee] text-white gap-2"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={getFullUrl(item.file_url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-[#0099ff] bg-transparent shadow-sm hover:bg-[#0099ff]/10 h-8 px-3 text-[#0099ff] gap-2"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </a>
+                      <Button
+                        size="sm"
+                        className="bg-[#0099ff] hover:bg-[#0088ee] text-white gap-2"
+                        onClick={() => handleDownload(item.file_url, item.name)}
+                      >
+                        <Download className="w-4 h-4" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

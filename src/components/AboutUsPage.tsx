@@ -28,7 +28,7 @@ interface AboutUsContent {
   };
   coverage: {
     title: string;
-    cards: Array<{ title: string; count: string; details: string[] }>;
+    cards: Array<{ title: string; count: string; details: string | string[] }>;
   };
 }
 
@@ -74,20 +74,8 @@ export function AboutUsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 overflow-hidden">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-[#0099ff] rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#0099ff] rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 py-8">
-          <nav className="flex items-center gap-2 text-sm mb-4 text-gray-600">
-            <button onClick={() => window.location.hash = '#home'} className="hover:text-[#0099ff] transition-colors">
-              Home
-            </button>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-[#0099ff]">{content.hero.title}</span>
-          </nav>
+      <div className="relative bg-blue-50 overflow-hidden border-b border-blue-100">
+        <div className="relative max-w-7xl mx-auto px-10 py-8 lg:py-12">
 
           <div className="flex items-center justify-between gap-8">
             <div className="text-gray-900 flex-1">
@@ -104,6 +92,14 @@ export function AboutUsPage() {
               </div>
             </div>
           </div>
+          <nav className="flex items-center gap-2 text-sm mb-4 text-gray-600">
+            <button onClick={() => window.location.hash = '#home'} className="hover:text-[#0099ff] transition-colors">
+              Home
+            </button>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-[#0099ff]">{content.hero.title}</span>
+          </nav>
+
         </div>
       </div>
 
@@ -256,10 +252,14 @@ export function AboutUsPage() {
                       <p className="text-[#0099ff]">{card.count}</p>
                     </div>
                   </div>
-                  <div className="space-y-2 text-gray-700 text-sm">
-                    {card.details.map((detail, i) => (
-                      <p key={i}>{detail}</p>
-                    ))}
+                  <div className="space-y-2 text-gray-700 text-sm whitespace-pre-line">
+                    {Array.isArray(card.details) ? (
+                      card.details.map((detail, i) => (
+                        <p key={i}>{detail}</p>
+                      ))
+                    ) : (
+                      <p>{card.details}</p>
+                    )}
                   </div>
                 </div>
               </Card>

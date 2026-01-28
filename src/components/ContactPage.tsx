@@ -20,6 +20,24 @@ export function ContactPage() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pageContent, setPageContent] = useState<any>(null);
+  const [contentLoading, setContentLoading] = useState(true);
+
+  useState(() => {
+    const fetchPageContent = async () => {
+      try {
+        const response = await client.get('pages/contact');
+        if (response.data && response.data.content) {
+          setPageContent(response.data.content);
+        }
+      } catch (error) {
+        console.error('Failed to fetch contact page content', error);
+      } finally {
+        setContentLoading(false);
+      }
+    };
+    fetchPageContent();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,35 +74,36 @@ export function ContactPage() {
     });
   };
 
+  if (contentLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0099ff]" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
+          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">{pageContent?.hero_title || 'Contact Us'}</h1>
+          <p className="text-xl text-white/90 max-w-3xl">
+            {pageContent?.hero_description || "Get in touch with us. We're here to help and answer any questions you might have."}
+          </p>
         </div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 relative">
-          <div className="text-center">
-            <h1 className="text-white mb-3">Contact Us</h1>
-            <div className="w-24 h-1 bg-white/80 mx-auto mb-4"></div>
-            <p className="text-white/90 max-w-2xl mx-auto leading-relaxed">
-              Get in touch with us. We're here to help and answer any questions you might have.
-            </p>
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* Main Content */}
       <section className="py-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Contact Form */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
               <div className="mb-6">
-                <h2 className="text-gray-900 mb-2">Send us a Message</h2>
+                <h2 className="text-gray-900 mb-2">{pageContent?.form_title || 'Send us a Message'}</h2>
                 <p className="text-gray-600 text-sm">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  {pageContent?.form_subtitle || "Fill out the form below and we'll get back to you as soon as possible."}
                 </p>
               </div>
 
@@ -367,7 +386,7 @@ export function ContactPage() {
 
       {/* Map or Additional Info Section */}
       <section className="py-12 bg-white border-t border-gray-200">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className="text-gray-900 mb-2">Visit Our Branches</h2>
             <p className="text-gray-600">

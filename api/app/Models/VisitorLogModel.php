@@ -15,6 +15,12 @@ class VisitorLogModel extends Model
     protected $allowedFields = [
         'visitor_id',
         'ip_address',
+        'city',
+        'country',
+        'country_code',
+        'region',
+        'timezone',
+        'isp',
         'user_agent',
         'referrer',
         'page_url',

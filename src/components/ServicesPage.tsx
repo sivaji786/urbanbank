@@ -23,6 +23,11 @@ interface ServiceCharge {
   status: string;
 }
 
+interface PageContent {
+  hero_title: string;
+  hero_description: string;
+}
+
 // Helper function to get icon component by name
 const getIconComponent = (iconName: string) => {
   const IconComponent = (Icons as any)[iconName];
@@ -32,6 +37,7 @@ const getIconComponent = (iconName: string) => {
 export function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [serviceCharges, setServiceCharges] = useState<ServiceCharge[]>([]);
+  const [pageContent, setPageContent] = useState<PageContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,14 +46,19 @@ export function ServicesPage() {
       setLoading(true);
       setError(null);
       try {
-        const [servicesRes, chargesRes] = await Promise.all([
+        const [servicesRes, chargesRes, pageRes] = await Promise.all([
           client.get('services'),
-          client.get('service-charges')
+          client.get('service-charges'),
+          client.get('pages/services')
         ]);
 
         // Filter only active services and charges
         setServices(servicesRes.data.filter((s: Service) => s.status === 'active'));
         setServiceCharges(chargesRes.data.filter((c: ServiceCharge) => c.status === 'active'));
+
+        if (pageRes.data && pageRes.data.content) {
+          setPageContent(pageRes.data.content);
+        }
       } catch (err) {
         console.error('Failed to fetch services data:', err);
         setError('Failed to load services. Please try again later.');
@@ -88,17 +99,17 @@ export function ServicesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h1 className="text-4xl lg:text-5xl mb-4">Our Banking Services</h1>
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
+          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">{pageContent?.hero_title || 'Our Banking Services'}</h1>
           <p className="text-xl text-white/90 max-w-3xl">
-            Experience comprehensive banking services designed for convenience, security, and efficiency. From digital payments to secure lockers, we've got you covered.
+            {pageContent?.hero_description || "Experience comprehensive banking services designed for convenience, security, and efficiency. From digital payments to secure lockers, we've got you covered."}
           </p>
         </div>
       </div>
 
       {/* Services Grid */}
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {services.map((service) => {
             const IconComponent = getIconComponent(service.icon);
@@ -217,7 +228,7 @@ export function ServicesPage() {
 
       {/* Map or Additional Info Section */}
       <section className="py-12 bg-white border-t border-gray-200">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h2 className="text-gray-900 mb-2">Visit Our Branches</h2>
             <p className="text-gray-600">

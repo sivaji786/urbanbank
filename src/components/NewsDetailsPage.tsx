@@ -50,7 +50,7 @@ export function NewsDetailsPage({ id }: { id: string }) {
     }
 
     return (
-        <div className="max-w-[1000px] mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-12">
             <Button
                 onClick={() => window.location.hash = '#news'}
                 variant="ghost"

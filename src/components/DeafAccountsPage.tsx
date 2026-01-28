@@ -103,14 +103,14 @@ export function DeafAccountsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-12 lg:py-16 border-b border-white/20 overflow-hidden shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 relative">
+        <div className="max-w-7xl mx-auto px-10 relative">
           <div className="text-center">
-            <h1 className="text-white mb-3">{pageData.hero_title}</h1>
+            <h1 className="text-white mb-3 font-bold">{pageData.hero_title}</h1>
             <div className="w-24 h-1 bg-white/80 mx-auto mb-4"></div>
             <p className="text-white/90 max-w-2xl mx-auto leading-relaxed">
               {pageData.hero_description}
@@ -121,7 +121,7 @@ export function DeafAccountsPage() {
 
       {/* Main Content */}
       <section className="py-8 sm:py-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Search Bar */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
             <div className="flex gap-2">
@@ -264,7 +264,7 @@ export function DeafAccountsPage() {
 
       {/* Info Banner */}
       <section className="py-12 bg-white border-t border-gray-200">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 border border-blue-100">
             <div className="text-center">
               <h2 className="text-gray-900 mb-3">{pageData.info_banner?.title}</h2>

@@ -47,8 +47,8 @@ export function News() {
 
         <div className="grid lg:grid-cols-2 gap-5">
           {newsItems.map((item, index) => (
-            <Card 
-              key={index} 
+            <Card
+              key={index}
               className="group relative overflow-hidden border-0 bg-gradient-to-br from-gray-50 to-white hover:shadow-xl transition-all duration-500"
             >
               <CardContent className="p-6">
@@ -61,23 +61,23 @@ export function News() {
                     </div>
                   )}
                 </div>
-                
+
                 <h3 className="text-xl text-gray-900 mb-3 group-hover:text-[#0099ff] transition-colors">
                   {item.title}
                 </h3>
-                
+
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
                   {item.description}
                 </p>
-                
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>{item.date}</span>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-[#0099ff] hover:text-[#0077cc] group/btn p-0 h-auto"
                   >
                     Read More
@@ -91,10 +91,10 @@ export function News() {
           ))}
         </div>
 
-        <div className="text-center mt-10">
-          <Button 
-            size="lg" 
-            variant="outline" 
+        <div className="text-center mt-20">
+          <Button
+            size="lg"
+            variant="outline"
             className="border border-gray-300 hover:border-[#0099ff] hover:text-[#0099ff] px-6"
           >
             View All Updates

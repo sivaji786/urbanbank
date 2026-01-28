@@ -23,7 +23,7 @@ export function LatestEventsSection() {
           date: new Date(item.date).toLocaleDateString(),
           title: item.title,
           description: item.description,
-          image: item.location || 'https://images.unsplash.com/photo-1757143137392-0b1e1a27a7de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW5raW5nJTIwZXZlbnQlMjBjZXJlbW9ueXxlbnwxfHx8fDE3NjE4MjgxODd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
+          image: item.image_url || 'https://images.unsplash.com/photo-1757143137392-0b1e1a27a7de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW5raW5nJTIwZXZlbnQlMjBjZXJlbW9ueXxlbnwxfHx8fDE3NjE4MjgxODd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
         }));
         setEvents(formattedEvents);
       } catch (error) {
@@ -37,7 +37,7 @@ export function LatestEventsSection() {
   }, []);
   return (
     <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
           <p className="text-[#0099ff] text-sm uppercase tracking-wide mb-2">News & Updates</p>
@@ -59,19 +59,11 @@ export function LatestEventsSection() {
                   <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
                     {/* Event Image */}
                     <div className="aspect-[16/10] overflow-hidden bg-gray-100">
-                      {typeof event.image === 'string' ? (
-                        <ImageWithFallback
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <img
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      )}
+                      <img
+                        src={event.image.startsWith('http') ? event.image : `${new URL(client.defaults.baseURL || '').origin}/${event.image}`}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
 
                     {/* Event Content */}
@@ -96,7 +88,7 @@ export function LatestEventsSection() {
 
                         {/* Read More Link - Right Side */}
                         <a
-                          href="#"
+                          href={`#event-details/${event.id}`}
                           className="text-[#0099ff] hover:text-[#0077cc] transition-colors text-sm inline-flex items-center gap-1 group/link"
                         >
                           Read More

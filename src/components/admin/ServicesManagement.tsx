@@ -189,7 +189,7 @@ export function ServicesManagement() {
                         <ArrowLeft className="h-5 w-5 text-gray-600" />
                     </Button>
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-xl font-semibold text-gray-900">
                             {view === 'edit' ? `Edit ${formData.title}` : 'Add New Service'}
                         </h2>
                         <p className="text-gray-500 text-sm">Configure service details and features</p>
@@ -363,11 +363,11 @@ export function ServicesManagement() {
     }
 
     return (
-        <div className="space-y-5 animate-in fade-in duration-500">
+        <div className="space-y-5 bg-white p-5 rounded-xl border border-gray-200 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-1">
                 <div className="flex-1 min-w-0">
                     <h2 className="text-3xl font-black text-gray-900 tracking-tight">Services</h2>
-                    <p className="text-gray-500 mt-1 text-lg">Manage banking services</p>
+                    <p className="text-gray-500 mt-1 text-sm">Manage banking services</p>
                 </div>
                 <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-[#0077cc] h-12 px-6 rounded-xl font-bold shadow-lg shadow-blue-500/20 gap-2">
                     <Plus className="h-5 w-5" />
@@ -398,7 +398,7 @@ export function ServicesManagement() {
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {services.length === 0 ? (
-                        <div className="text-center py-32 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
+                        <div className="text-center py-32 bg-gray-50/50 rounded-[2rem] border-2 border-slate-200">
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Plus className="w-8 h-8 text-gray-400" />
                             </div>
@@ -410,7 +410,7 @@ export function ServicesManagement() {
                         </div>
                     ) : (
                         services.map((service) => (
-                            <Card key={service.id} className="p-6 hover:shadow-2xl transition-all duration-300 border-gray-100 rounded-2xl group bg-white">
+                            <Card key={service.id} className="p-6 hover:shadow transition-all duration-300 border-gray-200 rounded-2xl group bg-white">
                                 <div className="flex flex-col h-full">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-4 mb-4">
@@ -448,10 +448,10 @@ export function ServicesManagement() {
                                     </div>
 
                                     <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
-                                        <Button variant="outline" onClick={() => handleEdit(service)} className="h-11 flex-1 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-bold text-gray-700">
+                                        <Button variant="outline" onClick={() => handleEdit(service)} className="h-11 flex-1 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-semibold text-gray-700">
                                             Edit
                                         </Button>
-                                        <Button variant="ghost" onClick={() => handleDelete(service.id!)} className="h-11 flex-1 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 font-bold">
+                                        <Button variant="ghost" onClick={() => handleDelete(service.id!)} className="h-11 flex-1 rounded-xl text-red-500 border border-red-100 hover:text-red-600 hover:bg-red-50 font-semibold">
                                             Delete
                                         </Button>
                                     </div>

@@ -96,26 +96,23 @@ export function VisionMissionPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Hero Section - Consistent with other pages */}
-      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-20 overflow-hidden">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-[1400px] mx-auto px-6 relative">
-          <div className="text-center">
-            <h1 className="text-white mb-4">{content.hero.title}</h1>
-            <div className="w-24 h-1 bg-white/80 mx-auto mb-6"></div>
-            <p className="text-white/90 max-w-3xl mx-auto text-xl leading-relaxed">
-              {content.hero.subtitle}
-            </p>
-          </div>
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
+          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">{content.hero.title}</h1>
+          <p className="text-xl text-white/90 max-w-3xl">
+            {content.hero.subtitle}
+          </p>
         </div>
-      </section>
+      </div>
 
       {/* Vision Section */}
       <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             <div className="grid lg:grid-cols-5 gap-0">
               {/* Icon Side */}
@@ -153,7 +150,7 @@ export function VisionMissionPage() {
 
       {/* Mission Section */}
       <section className="py-20 bg-gradient-to-br from-blue-50/50 to-white">
-        <div className="max-w-[1400px] mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
             <div className="grid lg:grid-cols-5 gap-0">
               {/* Content Side */}
@@ -205,7 +202,7 @@ export function VisionMissionPage() {
 
       {/* Values Section */}
       <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Section Header */}
           <div className="text-center mb-16">
             <div className="inline-block px-5 py-2 bg-yellow-500/10 rounded-full text-yellow-600 text-sm mb-6">
@@ -259,7 +256,7 @@ export function VisionMissionPage() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
 
-        <div className="max-w-[1400px] mx-auto px-6 relative">
+        <div className="max-w-7xl mx-auto px-6 relative">
           <div className="text-center mb-12">
             <h2 className="text-white mb-6">{content.commitment.title}</h2>
             <p className="text-white/90 text-xl max-w-4xl mx-auto leading-relaxed">

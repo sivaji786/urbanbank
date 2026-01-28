@@ -4,7 +4,7 @@ import { ArrowRight, Award, Globe, TrendingUp, Users } from 'lucide-react';
 export function WelcomeSection() {
   return (
     <section className="py-16 bg-white">
-      <div className="max-w-[1400px] mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
             <div className="space-y-3">
@@ -17,27 +17,27 @@ export function WelcomeSection() {
 
             <div className="space-y-4">
               <p className="text-base text-gray-600 leading-relaxed">
-                THE GUNTUR COOPERATIVE URBAN BANK LIMITED stands as a premiere co-operative bank 
-                in Andhra Pradesh, pioneering innovative schemes and delivering exceptional 
+                THE GUNTUR COOPERATIVE URBAN BANK LIMITED stands as a premiere co-operative bank
+                in Andhra Pradesh, pioneering innovative schemes and delivering exceptional
                 banking services across 51 branches.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                With over seven decades of excellence, we are committed to providing personalized 
+                With over seven decades of excellence, we are committed to providing personalized
                 banking solutions that empower individuals and businesses to achieve their financial goals.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="bg-[#0099ff] hover:bg-[#0088ee] text-white px-6"
               >
                 Open an Account
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 className="border-gray-300 hover:border-[#0099ff] hover:text-[#0099ff] px-6"
               >
                 Explore Services

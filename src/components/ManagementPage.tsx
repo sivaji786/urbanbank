@@ -63,16 +63,16 @@ export function ManagementPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-12 lg:py-16 border-b border-white/20 overflow-hidden shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-[1400px] mx-auto px-6 relative">
+        <div className="max-w-7xl mx-auto px-10 relative">
           <div className="text-center">
-            <h1 className="text-white mb-4">{heroTitle}</h1>
+            <h1 className="text-white mb-4 font-bold">{heroTitle}</h1>
             <div className="w-24 h-1 bg-white/80 mx-auto mb-6"></div>
-            <p className="text-white/90 max-w-3xl mx-auto text-lg">
+            <p className="text-white/90 max-w-3xl mx-auto text-lg leading-relaxed">
               {heroSubtitle}
             </p>
           </div>
@@ -81,7 +81,7 @@ export function ManagementPage() {
 
       {/* Management Team Grid */}
       <section className="py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           {/* Chairman - Featured Large Card */}
           {chairman && (
             <div className="mb-16">
@@ -242,7 +242,7 @@ export function ManagementPage() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-[1400px] mx-auto px-6 text-center relative">
+        <div className="max-w-7xl mx-auto px-6 text-center relative">
           <h2 className="text-white mb-4">Join Us in Our Journey</h2>
           <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
             Experience banking excellence with a team committed to your financial success

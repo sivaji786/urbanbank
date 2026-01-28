@@ -4,8 +4,8 @@ import bankBuilding from 'figma:asset/b1375a4d0dac914c59e97202a85c09fdbe93d5f9.p
 
 export function AboutUsSection() {
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-[1400px] mx-auto px-6">
+    <section className="py-16" style={{ backgroundColor: '#E0F2FE' }}>
+      <div className="max-w-7xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Square Bank Building Image with Rounded Corners */}
           <div className="flex justify-center lg:justify-start">

@@ -1,11 +1,11 @@
-export type PageType = 'home' | 'branch-locator' | 'about-us' | 'management' | 'vision-mission' | 'contact' | 'deaf-accounts' | 'gallery' | 'downloads' | 'financial-reports' | 'deposits' | 'loans' | 'services' | 'login' | 'admin' | 'news';
+export type PageType = 'home' | 'branch-locator' | 'about-us' | 'management' | 'vision-mission' | 'contact' | 'deaf-accounts' | 'gallery' | 'downloads' | 'financial-reports' | 'deposits' | 'loans' | 'services' | 'login' | 'admin' | 'news' | 'bank-objectives' | 'gold-rates';
 
 export const navigationMap: Record<string, PageType> = {
     '#home': 'home',
     '#branch-locator': 'branch-locator',
     '#about': 'about-us',
     '#management': 'management',
-    '#bank-objectives': 'vision-mission',
+    '#bank-objectives': 'bank-objectives',
     '#annual-reports': 'financial-reports',
     '#contact': 'contact',
     '#deaf-accounts': 'deaf-accounts',
@@ -17,7 +17,7 @@ export const navigationMap: Record<string, PageType> = {
     '#fixed-deposits': 'deposits',
     '#recurring-deposit': 'deposits',
     '#deposit-rates': 'deposits',
-    '#gold-rates': 'deposits',
+    '#gold-rates': 'gold-rates',
     '#bulk-rates': 'deposits',
     '#dicgc': 'home',
     '#loans': 'loans',
@@ -50,5 +50,9 @@ export const navigationMap: Record<string, PageType> = {
 export function getPageFromHash(hash: string): PageType | null {
     // Handle empty hash as home
     if (!hash || hash === '#') return 'home';
+
+    // Explicitly handle admin sub-routes
+    if (hash.startsWith('#admin')) return 'admin';
+
     return navigationMap[hash] || null;
 }

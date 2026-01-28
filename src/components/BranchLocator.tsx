@@ -23,27 +23,34 @@ export function BranchLocator() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('All');
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageContent, setPageContent] = useState<any>(null);
 
   useEffect(() => {
-    const fetchBranches = async () => {
+    const fetchData = async () => {
       try {
-        const response = await client.get('branches');
-        // Backend returns is_headquarter as 0/1 usually, so we map it if needed, or JS treats 1 as truthy.
-        // Let's ensure it's handled correctly for the UI which expects boolean
-        const data = response.data.map((b: any) => ({
+        const [branchesRes, pageRes] = await Promise.all([
+          client.get('branches'),
+          client.get('pages/branch-locator')
+        ]);
+
+        const data = branchesRes.data.map((b: any) => ({
           ...b,
           is_headquarter: b.is_headquarter == 1 || b.is_headquarter === true
         }));
         setBranches(data);
+
+        if (pageRes.data && pageRes.data.content) {
+          setPageContent(pageRes.data.content);
+        }
       } catch (error) {
-        console.error('Failed to load branches', error);
+        console.error('Failed to load branch data', error);
         toast.error('Failed to load branch data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchBranches();
+    fetchData();
   }, []);
 
   const districts = ['All', ...Array.from(new Set(branches.map(b => b.district)))];
@@ -64,17 +71,17 @@ export function BranchLocator() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#0099ff] via-[#0088ee] to-[#0077dd] py-12 lg:py-16 border-b border-white/20 overflow-hidden shadow-lg">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 relative">
+        <div className="max-w-7xl mx-auto px-10 relative">
           <div className="text-center">
-            <h1 className="text-white mb-3">Branch Locator</h1>
+            <h1 className="text-white mb-3 font-bold">{pageContent?.hero?.title || 'Branch Locator'}</h1>
             <div className="w-24 h-1 bg-white/80 mx-auto mb-4"></div>
-            <p className="text-white/90 max-w-2xl mx-auto leading-relaxed">
-              13 Branches Across Andhra Pradesh
+            <p className="text-white/90 max-w-2xl mx-auto leading-relaxed text-xl">
+              {pageContent?.hero?.subtitle || '13 Branches Across Andhra Pradesh'}
             </p>
           </div>
         </div>
@@ -82,7 +89,7 @@ export function BranchLocator() {
 
       {/* Main Content */}
       <section className="py-8 sm:py-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-6">
           {isLoading ? (
             <div className="flex justify-center items-center py-20">
               <Loader2 className="w-10 h-10 animate-spin text-[#0099ff]" />

@@ -73,16 +73,14 @@ export function SettingsManagement() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-3 mb-6">
         <div>
-          <h2 className="text-gray-900 mb-2">Settings</h2>
-          <p className="text-gray-600">
-            Configure website settings. (Contact recipient managed in General to "Contact Email")
-          </p>
+          <h2 className="text-[28px] font-black text-gray-900 tracking-tighter leading-tight font-['Poppins']">System Settings</h2>
+          <p className="text-md font-black text-gray-400 uppercase tracking-widest mt-0.5">Global configuration protocol</p>
         </div>
-        <Button onClick={handleSave} disabled={isLoading} className="bg-[#0099ff] hover:bg-[#0088ee]">
+        <Button onClick={handleSave} disabled={isLoading} className="bg-[#0099ff] hover:bg-black text-[9px] font-black px-6 h-10 rounded-xl shadow-md uppercase tracking-[0.2em] transition-all duration-300">
           <Save className="h-4 w-4 mr-2" />
-          {isLoading ? 'Saving...' : 'Save All Changes'}
+          {isLoading ? 'SYNCING...' : 'SAVE ALL CHANGES'}
         </Button>
       </div>
 
@@ -90,8 +88,8 @@ export function SettingsManagement() {
       <div className="grid grid-cols-12 gap-4">
         {/* Settings Menu */}
         <div className="col-span-12 lg:col-span-3">
-          <Card className="p-3">
-            <nav className="space-y-1">
+          <Card className="p-2 border-slate-200 shadow-sm rounded-xl">
+            <nav className="space-y-0.5">
               {[
                 { id: 'general' as SettingsSection, label: 'General', icon: Settings },
                 { id: 'seo' as SettingsSection, label: 'SEO', icon: Search },
@@ -106,14 +104,14 @@ export function SettingsManagement() {
                   <button
                     key={item.id}
                     onClick={() => setActiveSection(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isActive
-                      ? 'bg-[#0099ff] text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100'
+                    className={`w-full flex items-center gap-2.5 px-3 py-3 mb-1 rounded-xl transition-all text-sm font-semibold tracking-widest ${isActive
+                      ? 'bg-[#0099ff] text-white shadow-lg shadow-blue-100/50 scale-[1.02]'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {isActive && <ChevronRight className="h-3.5 w-3.5" />}
+                    <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-[#CBD5E1]'}`} />
+                    <span className="flex-1 px-2 text-left font-['Poppins']">{item.label}</span>
+                    {isActive && <ChevronRight className="h-3 w-3 opacity-60" />}
                   </button>
                 );
               })}
@@ -123,134 +121,133 @@ export function SettingsManagement() {
 
         {/* Settings Content */}
         <div className="col-span-12 lg:col-span-9">
-          <Card className="p-5">
+          <Card className="p-4 border-slate-200 shadow-sm rounded-xl">
             {/* General Settings */}
             {activeSection === 'general' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-gray-900 mb-1">General Settings</h3>
-                  <p className="text-sm text-gray-600">Basic website configuration</p>
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight font-['Poppins']">General Configuration</h3>
+                  <p className="text-sm font-black text-gray-400 uppercase tracking-widest mt-0.5">Core website and contact protocols</p>
                 </div>
-                <Separator />
+                <Separator className="bg-slate-100" />
 
                 <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="site_name">Site Name</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="site_name" className="text-md font-semibold text-slate-500 tracking-wider">Site Name</Label>
                     <Input
                       id="site_name"
                       value={settings.site_name || 'Guntur Urban Co-operative Bank'}
                       onChange={(e) => updateSetting('site_name', e.target.value)}
-                      className="mt-1.5"
+                      className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="site_tagline">Tagline</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="site_tagline" className="text-md font-semibold text-slate-500 tracking-wider">Tagline</Label>
                     <Input
                       id="site_tagline"
                       value={settings.site_tagline || ''}
                       onChange={(e) => updateSetting('site_tagline', e.target.value)}
                       placeholder="e.g. Banking Excellence Since 1981"
-                      className="mt-1.5"
+                      className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="domain_name">Domain Name</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="domain_name" className="text-md font-semibold text-slate-500 tracking-wider">Domain Name</Label>
                     <Input
                       id="domain_name"
                       value={settings.domain_name || ''}
                       onChange={(e) => updateSetting('domain_name', e.target.value)}
                       placeholder="e.g. https://guntururbanbank.org"
-                      className="mt-1.5"
+                      className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                     />
-                    <p className="text-xs text-gray-600 mt-1">Full URL including https:// (used for Canonical and Sitemap)</p>
+                    <p className="text-sm text-gray-400 font-medium tracking-tight">Full URL used for Canonical and Sitemap</p>
                   </div>
 
-                  <div>
-                    <Label htmlFor="site_description">Site Description</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="site_description" className="text-md font-semibold text-slate-500 tracking-wider">Site Description</Label>
                     <Textarea
                       id="site_description"
                       value={settings.site_description || ''}
                       onChange={(e) => updateSetting('site_description', e.target.value)}
                       placeholder="Describe your bank..."
                       rows={3}
-                      className="mt-1.5"
+                      className="text-sm rounded-lg resize-none min-h-[80px] border-slate-200 focus-visible:ring-[#0099ff]"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="contact_email">Contact Recipient Email</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="contact_email" className="text-md font-semibold text-slate-500 tracking-wider">Contact Recipient Email</Label>
                       <Input
                         id="contact_email"
                         type="email"
                         value={settings.contact_email || ''}
                         onChange={(e) => updateSetting('contact_email', e.target.value)}
-                        placeholder="e.g. gcubhelpdesk@guntururbanbank.org"
-                        className="mt-1.5"
+                        placeholder="e.g. helpdesk@guntururbanbank.org"
+                        className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">This email will receive all "Contact Us" form submissions.</p>
+                      <p className="text-sm text-gray-400 font-medium tracking-tight">Receives all "Contact Us" submissions.</p>
                     </div>
-                    <div>
-                      <Label htmlFor="deposit_emails">Deposit Application Emails</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="deposit_emails" className="text-md font-semibold text-slate-500 tracking-wider">Deposit Application Emails</Label>
                       <Input
                         id="deposit_emails"
                         value={settings.deposit_emails || ''}
                         onChange={(e) => updateSetting('deposit_emails', e.target.value)}
-                        placeholder="e.g. gcubhelpdesk@guntururbanbank.org, admin@example.com"
-                        className="mt-1.5"
+                        placeholder="e.g. deposit@example.com"
+                        className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Comma-separated emails to receive deposit applications.</p>
+                      <p className="text-sm text-gray-400 font-medium tracking-tight">Comma-separated emails.</p>
                     </div>
-                    <div>
-                      <Label htmlFor="loan_emails">Loan Application Emails</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="loan_emails" className="text-md font-semibold text-slate-500 tracking-wider">Loan Application Emails</Label>
                       <Input
                         id="loan_emails"
                         value={settings.loan_emails || ''}
                         onChange={(e) => updateSetting('loan_emails', e.target.value)}
-                        placeholder="e.g. gcubhelpdesk@guntururbanbank.org, loan@example.com"
-                        className="mt-1.5"
+                        placeholder="e.g. loan@example.com"
+                        className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Comma-separated emails to receive loan applications.</p>
                     </div>
-                    <div>
-                      <Label htmlFor="support-phone">Support Phone</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="support-phone" className="text-md font-semibold text-slate-500 tracking-wider">Support Phone</Label>
                       <Input
                         id="support-phone"
                         defaultValue="1800-425-8873"
-                        className="mt-1.5"
+                        className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="visitor_count_offset">Visitor Count Offset</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="visitor_count_offset" className="text-md font-semibold text-slate-500 tracking-wider">Visitor Count Offset</Label>
                     <Input
                       id="visitor_count_offset"
                       type="number"
                       value={settings.visitor_count_offset || 0}
                       onChange={(e) => updateSetting('visitor_count_offset', parseInt(e.target.value) || 0)}
                       placeholder="e.g. 125326"
-                      className="mt-1.5"
+                      className="h-9 text-sm rounded-lg border-slate-200"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">This number will be added to actual site visits for the total count displayed in footer.</p>
+                    <p className="text-sm text-gray-400 font-medium tracking-tight">Added to actual visits for display.</p>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
                     <div>
-                      <p className="text-sm text-gray-900">Maintenance Mode</p>
-                      <p className="text-xs text-gray-600">Temporarily disable the website</p>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-tight">Maintenance Mode</p>
+                      <p className="text-sm text-slate-500">Temporarily disable the website</p>
                     </div>
-                    <Switch />
+                    <Switch className="scale-75" />
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
                     <div>
-                      <p className="text-sm text-gray-900">Registration</p>
-                      <p className="text-xs text-gray-600">Allow new user registration</p>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-tight">Registration</p>
+                      <p className="text-sm text-slate-500">Allow new user registration</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch defaultChecked className="scale-75" />
                   </div>
                 </div>
               </div>
@@ -584,33 +581,34 @@ export function SettingsManagement() {
 
             {/* Analytics Settings */}
             {activeSection === 'analytics' && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-gray-900 mb-1">Analytics Integration</h3>
-                  <p className="text-sm text-gray-600">Track website performance and user behavior</p>
+                  <h3 className="text-sm font-bold text-[#0F172A] uppercase tracking-wider mb-0.5">Analytics Integration</h3>
+                  <p className="text-md text-slate-500 uppercase tracking-tight font-medium">Track performance and user behavior</p>
                 </div>
-                <Separator />
+                <Separator className="bg-slate-100" />
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg border border-slate-100">
                     <div>
-                      <p className="text-sm text-gray-900">Enable Analytics</p>
-                      <p className="text-xs text-gray-600">Track website visitors and behavior</p>
+                      <p className="text-xs font-bold text-[#0F172A] uppercase tracking-tight">Enable Analytics</p>
+                      <p className="text-sm text-slate-500">Track website visitors and behavior</p>
                     </div>
                     <Switch
+                      className="scale-75"
                       checked={settings.analytics_enabled === '1'}
                       onCheckedChange={(checked: boolean) => updateSetting('analytics_enabled', checked ? '1' : '0')}
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="ga-tracking">Google Analytics Tracking ID</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="ga-tracking" className="text-md font-bold text-slate-500 uppercase tracking-wider">Google Analytics Tracking ID</Label>
                     <Input
                       id="ga-tracking"
                       value={settings.ga_tracking_id || ''}
                       onChange={(e) => updateSetting('ga_tracking_id', e.target.value)}
-                      placeholder="G-XXXXXXXXXX or UA-XXXXXXXXX-X"
-                      className="mt-1.5"
+                      placeholder="G-XXXXXXXXXX"
+                      className="h-9 text-sm rounded-lg border-slate-200 focus-visible:ring-[#0099ff]"
                     />
                   </div>
 

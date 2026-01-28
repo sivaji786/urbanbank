@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Home, Building2, Building, GraduationCap, Coins } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import logo from 'figma:asset/6705fbbec794189a9f9b05c8b8f04e8469de538b.png';
 
 const slides = [
   {
@@ -47,11 +45,9 @@ export function HeroSlider() {
 
   useEffect(() => {
     if (!isAutoPlaying) return;
-
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, [isAutoPlaying]);
 
@@ -74,61 +70,55 @@ export function HeroSlider() {
   };
 
   return (
-    <section className="relative h-[350px] lg:h-[550px] overflow-hidden bg-gray-900 mt-[104px]">
-      {/* Fixed Logo Overlay */}
-      <div className="absolute top-6 right-6 z-20 bg-white/95 backdrop-blur-sm rounded-xl p-3 lg:p-4 shadow-2xl border border-gray-100">
-        <img src={logo} alt="Guntur Bank Logo" className="h-12 w-12 lg:h-16 lg:w-16" />
-      </div>
-
-      {/* Slides */}
-      <div className="relative h-full">
-        {slides.map((slide, index) => {
-          return (
+    <section
+      className="hero-section relative w-full bg-gray-900 overflow-hidden h-auto lg:h-[600px]"
+    >
+      <div className="relative w-full h-full">
+        <div className="relative w-full h-full">
+          {slides.map((slide, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+              className={`w-full h-full transition-opacity duration-1000 ease-in-out bg-gray-900 ${index === currentSlide ? 'opacity-100 z-10 relative lg:absolute lg:inset-0' : 'opacity-0 z-0 absolute inset-0'
                 }`}
             >
-              <ImageWithFallback
+              {/* Image Layer */}
+              <img
                 src={slide.image}
                 alt={slide.alt}
-                className="w-full h-full object-cover"
+                className="w-full h-auto lg:h-full lg:object-cover"
+                style={{ objectPosition: 'center' }}
               />
+
+              {/* Gradient Overlay - Removed for cleaner look */}
             </div>
-          );
-        })}
-      </div>
+          ))}
 
-      {/* Navigation arrows */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-3 lg:left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 lg:w-12 lg:h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 group"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-5 w-5 lg:h-6 lg:w-6 text-white group-hover:scale-110 transition-transform" />
-      </button>
-
-      <button
-        onClick={nextSlide}
-        className="absolute right-3 lg:right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 lg:w-12 lg:h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 group"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-5 w-5 lg:h-6 lg:w-6 text-white group-hover:scale-110 transition-transform" />
-      </button>
-
-      {/* Dots indicator */}
-      <div className="absolute bottom-4 lg:bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {slides.map((_, index) => (
+          {/* Navigation Arrows */}
           <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`transition-all duration-300 rounded-full ${index === currentSlide
-              ? 'w-8 lg:w-10 h-1.5 bg-white'
-              : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/75'
-              }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+            onClick={prevSlide}
+            className="absolute left-4 lg:left-10 top-1/2 -translate-y-1/2 z-50 w-10 h-10 lg:w-16 lg:h-16 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20"
+          >
+            <ChevronLeft className="w-6 h-6 lg:w-8 lg:h-8" />
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 lg:right-10 top-1/2 -translate-y-1/2 z-50 w-10 h-10 lg:w-16 lg:h-16 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/20"
+          >
+            <ChevronRight className="w-6 h-6 lg:w-8 lg:h-8" />
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 flex gap-2 lg:gap-3">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`h-1.5 lg:h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 lg:w-12 bg-[#0099ff]' : 'w-3 lg:w-4 bg-white/40 hover:bg-white/70'
+                  }`}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

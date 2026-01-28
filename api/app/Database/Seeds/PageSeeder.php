@@ -80,23 +80,17 @@ class PageSeeder extends Seeder
                             [
                                 'title' => 'Guntur District',
                                 'count' => '11 Branches',
-                                'details' => [
-                                    '• Brodipet, Pattabhipuram',
-                                    '• Kothapet, Chandramouli Nagar',
-                                    '• R.Agraharam, Sattenapalli',
-                                    '• Chilakaluripet, Ponnur',
-                                    '• Tenali, Mangalagiri, Narasaraopet'
-                                ]
+                                'details' => "• Brodipet, Pattabhipuram\n• Kothapet, Chandramouli Nagar\n• R.Agraharam, Sattenapalli\n• Chilakaluripet, Ponnur\n• Tenali, Mangalagiri, Narasaraopet"
                             ],
                             [
                                 'title' => 'Krishna District',
                                 'count' => '1 Branch',
-                                'details' => ['• Gollapudi (Near Vijayawada)']
+                                'details' => "• Gollapudi (Near Vijayawada)"
                             ],
                             [
                                 'title' => 'Prakasam District',
                                 'count' => '1 Branch',
-                                'details' => ['• Ongole']
+                                'details' => "• Ongole"
                             ]
                         ]
                     ]
@@ -167,10 +161,35 @@ class PageSeeder extends Seeder
                     'chairman_role' => 'Chairman',
                     'vice_chairman_role' => 'Vice - Chairman'
                 ])
+            ],
+            [
+                'slug' => 'bank-objective',
+                'title' => 'Bank Objectives',
+                'content' => json_encode([
+                    'hero' => [
+                        'title' => 'Our Objectives',
+                        'subtitle' => 'Established with a core mission to provide reliable and secure banking solutions for the community of Guntur.'
+                    ],
+                    'objectives' => [
+                        ['title' => 'Financial Inclusion', 'description' => 'Providing simplified and accessible banking services to reach all sections of society, fostering economic growth.'],
+                        ['title' => 'Customer Centricity', 'description' => 'Setting new standards in customer service through personalized attention mixed with modern direct banking.'],
+                        ['title' => 'Community Empowerment', 'description' => 'Supporting local businesses and self-employed individuals with robust credit facilities.'],
+                        ['title' => 'Operational Integrity', 'description' => 'Maintaining total transparency and highest security protocols in every transaction and operation.'],
+                        ['title' => 'Cooperative Heritage', 'description' => 'Preserving the values of mutual help and togetherness that define the cooperative spirit.'],
+                        ['title' => 'Modern Innovation', 'description' => 'Continuously upgrading our technology infrastructure to offer competitive digital banking solutions.']
+                    ]
+                ])
             ]
         ];
 
         // Using Query Builder
-        $this->db->table('pages')->ignore(true)->insertBatch($data);
+        foreach ($data as $page) {
+            $exists = $this->db->table('pages')->where('slug', $page['slug'])->countAllResults();
+            if ($exists > 0) {
+                $this->db->table('pages')->where('slug', $page['slug'])->update(['content' => $page['content']]);
+            } else {
+                $this->db->table('pages')->insert($page);
+            }
+        }
     }
 }

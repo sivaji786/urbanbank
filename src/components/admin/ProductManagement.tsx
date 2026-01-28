@@ -14,6 +14,7 @@ import {
 } from '../ui/select';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import client from '../../api/client';
+import { cn } from '../ui/utils';
 
 interface RateRow {
     row_data: string[];
@@ -262,268 +263,277 @@ export function ProductManagement({ category }: ProductManagementProps) {
     if (view === 'add' || view === 'edit') {
         return (
             <div className="space-y-6 animate-in fade-in duration-500">
-                <div className="flex items-center gap-4 border-b border-gray-200 pb-4">
-                    <Button variant="outline" size="icon" onClick={handleBackToList} className="rounded-full h-10 w-10 border-gray-300 hover:bg-gray-100">
-                        <ArrowLeft className="h-5 w-5 text-gray-600" />
+                <div className="flex items-center gap-4 pb-4">
+                    <Button variant="ghost" size="icon" onClick={handleBackToList} className="h-9 w-9 rounded-full hover:bg-slate-50 border border-slate-200 shadow-none">
+                        <ArrowLeft className="h-4 w-4 text-slate-400" />
                     </Button>
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            {view === 'edit' ? `Edit ${formData.title}` : `Add New ${category === 'deposit' ? 'Deposit' : 'Loan'}`}
+                        <h2 className="text-[20px] font-semibold text-slate-900 leading-tight">
+                            {view === 'edit' ? `Edit ${formData.title}` : `New ${category === 'deposit' ? 'Deposit' : 'Loan'} Configuration`}
                         </h2>
-                        <p className="text-gray-500 text-sm">Configure {formData.category} details and features</p>
+                        <p className="text-sm font-normal text-gray-500 tracking-wide mt-0.5">Define institutional {formData.category} parameters</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5 max-w-5xl mx-auto">
-                    {/* Basic Info Card */}
-                    <Card className="p-5 border-gray-100 shadow-lg shadow-gray-200/50 rounded-2xl">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <Receipt className="w-5 h-5 text-[#0099ff]" />
-                            </div>
-                            <h3 className="text-lg font-bold text-gray-900">Basic Information</h3>
-                        </div>
+                <form onSubmit={handleSubmit} className="animate-in slide-in-from-bottom-4 duration-700 w-full mx-auto pb-20">
+                    <div className="flex flex-col md:flex-row gap-8 items-start w-full">
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-200 pb-4">
-                            <div className="space-y-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="title" className="text-gray-700 font-semibold">Product Title</Label>
-                                    <Input
-                                        id="title"
-                                        value={formData.title}
-                                        onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                        placeholder="e.g. Senior Citizen Fixed Deposit"
-                                        className="h-11 rounded-xl"
-                                        required
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="description" className="text-gray-700 font-semibold">Description</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={formData.description}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                        placeholder="A short, catchy summary for the product card..."
-                                        rows={4}
-                                        className="rounded-xl resize-none"
-                                    />
-                                </div>
-                                <div className="grid gap-2 pt-2">
-                                    <Label className="text-gray-700 font-semibold">Product Image</Label>
-                                    <div className="flex flex-col gap-4">
-                                        {imagePreview && (
-                                            <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
-                                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                                <Button
-                                                    type="button"
-                                                    variant="destructive"
-                                                    size="icon"
-                                                    className="absolute top-2 right-2 rounded-full h-8 w-8 shadow-lg"
-                                                    onClick={() => {
-                                                        setSelectedImage(null);
-                                                        setImagePreview(null);
-                                                    }}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        )}
-                                        <div className="flex items-center justify-center w-full">
-                                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-colors ${imagePreview ? 'border-gray-200' : 'border-blue-200 bg-blue-50/30'}`}>
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                    <Layout className="w-8 h-8 text-blue-500 mb-2 opacity-60" />
-                                                    <p className="text-sm text-gray-600 font-medium">Click to upload or drag and drop</p>
-                                                    <p className="text-xs text-gray-400 mt-1">PNG, JPG or WEBP (Max 2MB)</p>
-                                                </div>
-                                                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                                            </label>
-                                        </div>
+                        {/* Left Column: Basic Parameters (30%) */}
+                        <div className="flex-1 shrink-0 space-y-6">
+                            <Card className="p-6 border-slate-200 shadow-none rounded-2xl bg-white">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                        <Receipt className="w-5 h-5 text-slate-400" />
                                     </div>
+                                    <h3 className="text-md font-semibold text-slate-900 uppercase tracking-[0.12em]">Basic Institutional Parameters</h3>
                                 </div>
-                            </div>
 
-                            <div className="space-y-6">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="summary_rate" className="text-gray-700 font-semibold">Highlighted Rate</Label>
-                                    <div className="relative">
-                                        <Percent className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                <div className="space-y-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title" className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.1em]">Product Nomenclature</Label>
                                         <Input
-                                            id="summary_rate"
-                                            value={formData.summary_rate}
-                                            onChange={e => setFormData({ ...formData, summary_rate: e.target.value })}
-                                            placeholder="e.g. 7.50% p.a."
-                                            className="pl-10 h-11 rounded-xl"
+                                            id="title"
+                                            value={formData.title}
+                                            onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                            placeholder="e.g. Senior Citizen Fixed Deposit"
+                                            className="h-11 text-[13px] rounded-xl border-slate-200 focus-visible:ring-blue-500/20 shadow-none"
+                                            required
                                         />
                                     </div>
-                                    <p className="text-xs text-gray-500">Display value for the main product card.</p>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="status" className="text-gray-700 font-semibold">Status</Label>
-                                    <Select value={formData.status} onValueChange={(val: any) => setFormData({ ...formData, status: val })}>
-                                        <SelectTrigger className="h-11 rounded-xl">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="inactive">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Features Card */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-purple-50 rounded-lg">
-                                    <List className="w-5 h-5 text-purple-600" />
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900">Key Features</h3>
-                            </div>
-                            <Button type="button" variant="outline" size="sm" onClick={addFeature} className="rounded-full gap-1">
-                                <Plus className="h-3 w-3" /> Add Feature
-                            </Button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-gray-200 pb-4">
-                            {formData.features.map((feature, idx) => (
-                                <div key={idx} className="flex gap-2 group">
-                                    <div className="h-10 w-10 bg-gray-50 rounded-lg flex items-center justify-center text-sm font-bold text-gray-400 shrink-0">
-                                        {idx + 1}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description" className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.1em]">Executive Summary</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={formData.description}
+                                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                            placeholder="Brief technical overview..."
+                                            rows={5}
+                                            className="text-[13px] rounded-xl resize-none min-h-[120px] border-slate-200 focus-visible:ring-blue-500/20 shadow-none leading-relaxed"
+                                        />
                                     </div>
-                                    <Input
-                                        value={feature}
-                                        onChange={e => updateFeature(idx, e.target.value)}
-                                        placeholder={`Feature ${idx + 1}`}
-                                        className="h-10 rounded-lg"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => removeFeature(idx)}
-                                        disabled={formData.features.length === 1}
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Rate Card Table */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-amber-50 rounded-lg">
-                                    <Coins className="w-5 h-5 text-amber-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Interest Rate Card</h3>
-                                    <p className="text-sm text-gray-500">Define table structure and data.</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button type="button" variant="outline" size="sm" onClick={addHeader} className="rounded-full gap-1">
-                                    <Layout className="w-3 h-3" /> Add Column
-                                </Button>
-                                <Button type="button" variant="outline" size="sm" onClick={addRateRow} className="rounded-full gap-1">
-                                    <List className="w-3 h-3" /> Add Row
-                                </Button>
-                            </div>
-                        </div>
-
-                        <div className="overflow-x-auto border rounded-xl bg-gray-50/30">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="bg-gray-100/50 border-b border-gray-200">
-                                        {formData.rate_headers.map((header, colIdx) => (
-                                            <th key={colIdx} className="p-3 min-w-[200px]">
-                                                <div className="flex items-center gap-2">
-                                                    <Input
-                                                        value={header}
-                                                        onChange={e => updateHeader(colIdx, e.target.value)}
-                                                        className="h-9 font-bold border-gray-300 bg-white flex-1"
-                                                    />
+                                    <div className="space-y-2">
+                                        <Label className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.1em]">Branding Asset</Label>
+                                        <div className="flex flex-col gap-4">
+                                            {imagePreview && (
+                                                <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                                                     <Button
                                                         type="button"
-                                                        variant="ghost"
+                                                        variant="outline"
                                                         size="icon"
-                                                        className="h-8 w-8 text-gray-400 hover:text-red-500 shrink-0"
-                                                        onClick={() => removeHeader(colIdx)}
-                                                        disabled={formData.rate_headers.length === 1}
+                                                        className="absolute top-2 right-2 rounded-full h-8 w-8 bg-white/90 border-slate-200 backdrop-blur-sm"
+                                                        onClick={() => {
+                                                            setSelectedImage(null);
+                                                            setImagePreview(null);
+                                                        }}
                                                     >
-                                                        <X className="h-4 w-4" />
+                                                        <X className="h-4 w-4 text-slate-400" />
                                                     </Button>
                                                 </div>
-                                            </th>
-                                        ))}
-                                        <th className="w-12 p-3"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {formData.rates.map((rate, rowIdx) => (
-                                        <tr key={rowIdx} className="border-b border-gray-100 bg-white last:border-0 hover:bg-gray-50/50">
-                                            {rate.row_data.map((val, colIdx) => (
-                                                <td key={colIdx} className="p-3">
-                                                    <Input
-                                                        value={val}
-                                                        onChange={e => updateRateData(rowIdx, colIdx, e.target.value)}
-                                                        className="h-10 border-transparent hover:border-gray-200 focus:border-[#0099ff] bg-transparent focus:bg-white transition-all"
-                                                        placeholder="Value"
-                                                    />
-                                                </td>
-                                            ))}
-                                            <td className="p-3">
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-9 w-9 text-gray-300 hover:text-red-500"
-                                                    onClick={() => removeRateRow(rowIdx)}
-                                                    disabled={formData.rates.length === 1}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </td>
-                                        </tr>
+                                            )}
+                                            <div className="flex items-center justify-center w-full">
+                                                <label className={`flex flex-col items-center justify-center w-full h-36 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-slate-50 transition-all ${imagePreview ? 'border-slate-200' : 'border-slate-200 bg-slate-50/50 hover:border-blue-400/50'}`}>
+                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <Layout className="w-8 h-8 text-slate-300 mb-2" />
+                                                        <p className="text-[13px] text-slate-600 font-semibold">Deploy Portfolio Asset</p>
+                                                        <p className="text-[11px] text-slate-400 mt-1 uppercase tracking-tighter">PNG · JPG · WEBP (MAX 2MB)</p>
+                                                    </div>
+                                                    <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="summary_rate" className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.1em]">Highlighted Yield</Label>
+                                        <div className="relative">
+                                            <Percent className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-300" />
+                                            <Input
+                                                id="summary_rate"
+                                                value={formData.summary_rate}
+                                                onChange={e => setFormData({ ...formData, summary_rate: e.target.value })}
+                                                placeholder="e.g. 7.50% p.a."
+                                                className="pl-10 h-11 text-[13px] rounded-xl border-slate-200 focus-visible:ring-blue-500/20 shadow-none font-semibold"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="status" className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.1em]">Operational Status</Label>
+                                        <Select value={formData.status} onValueChange={(val: any) => setFormData({ ...formData, status: val })}>
+                                            <SelectTrigger className="h-11 text-[13px] border-slate-200 rounded-xl shadow-none focus:ring-blue-500/20 bg-slate-50/30">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                                                <SelectItem value="active" className="text-[13px]">Operational (Active)</SelectItem>
+                                                <SelectItem value="inactive" className="text-[13px]">Restricted (Inactive)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+
+                        {/* Right Column: Features & Rates (70%) */}
+                        <div className="basis-[70%] space-y-6 min-w-0">
+                            {/* Features Card */}
+                            <Card className="p-4 border-slate-200 shadow-none rounded-2xl bg-white">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                            <List className="w-5 h-5 text-slate-400" />
+                                        </div>
+                                        <h3 className="text-md font-semibold text-slate-900 uppercase tracking-[0.12em]">Product Features</h3>
+                                    </div>
+                                    <Button type="button" variant="outline" size="sm" onClick={addFeature} className="h-10 text-sm font-semibold uppercase tracking-wider border-slate-200 shadow-none rounded-xl hover:bg-blue-100 px-5">
+                                        <Plus className="h-4 w-4 mr-2" /> Add Module
+                                    </Button>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                    {formData.features.map((feature, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 group mb-3">
+                                            <div className="h-11 w-11 bg-slate-50 rounded-3xl p-2 flex items-center justify-center text-sm font-semibold text-slate-400 shrink-0 border border-slate-100 shadow-sm">
+                                                {String(idx + 1).padStart(2, '0')}
+                                            </div>
+                                            <div className="flex-1">
+                                                <Input
+                                                    value={feature}
+                                                    onChange={e => updateFeature(idx, e.target.value)}
+                                                    placeholder={`Enter feature ${idx + 1}`}
+                                                    className="h-11 text-[13px] rounded-xl border-slate-200 focus-visible:ring-blue-500/20 shadow-none"
+                                                />
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => removeFeature(idx)}
+                                                disabled={formData.features.length === 1}
+                                                className="h-11 w-11 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shrink-0 border border-transparent hover:border-red-100"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </div>
+                            </Card>
 
+                            {/* Rate Card Table */}
+                            <Card className="p-8 border-slate-200 shadow-none rounded-2xl bg-white overflow-hidden">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <Coins className="w-5 h-5 text-slate-400" />
+                                        </div>
+                                        <h3 className="text-md font-semibold text-slate-900 uppercase tracking-[0.12em]">Interest Configuration</h3>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <Button type="button" variant="outline" size="sm" onClick={addHeader} className="h-10 text-sm font-semibold uppercase tracking-wider border-slate-200 shadow-none rounded-xl hover:bg-blue-100 font-['Inter']">
+                                            <Layout className="w-4 h-4 mr-2" /> Add Column
+                                        </Button>
+                                        <Button type="button" variant="outline" size="sm" onClick={addRateRow} className="h-10 text-sm font-semibold uppercase tracking-wider border-slate-200 shadow-none rounded-xl hover:bg-blue-100">
+                                            <List className="w-4 h-4 mr-2" /> Add Row
+                                        </Button>
+                                    </div>
+                                </div>
 
-                        <div className="flex justify-end gap-4 pt-6 pb-20">
-                            <Button type="button" variant="outline" onClick={handleBackToList} disabled={submitting} className="h-10 px-8 rounded-xl font-medium text-gray-600">
-                                Cancel
-                            </Button>
-                            <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc] h-10 px-8 rounded-xl font-bold text-md shadow-xl shadow-blue-500/20" disabled={submitting}>
-                                {submitting ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin mr-2" /> Saving...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-5 h-5 mr-2" /> Save Product
-                                    </>
-                                )}
-                            </Button>
+                                <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-slate-50/30">
+                                    <table className="w-full text-[13px]">
+                                        <thead>
+                                            <tr className="bg-slate-100/50">
+                                                {formData.rate_headers.map((header, colIdx) => (
+                                                    <th key={colIdx} className="p-4 min-w-[180px] border-b border-slate-200">
+                                                        <div className="flex items-center gap-2">
+                                                            <Input
+                                                                value={header}
+                                                                onChange={e => updateHeader(colIdx, e.target.value)}
+                                                                className="h-10 text-[11px] font-black uppercase tracking-widest border-slate-200 bg-white focus-visible:ring-blue-500/20 shadow-none rounded-lg text-slate-600"
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-10 w-10 text-slate-300 hover:text-red-500 shrink-0 hover:bg-red-100 rounded-lg"
+                                                                onClick={() => removeHeader(colIdx)}
+                                                                disabled={formData.rate_headers.length === 1}
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </th>
+                                                ))}
+                                                <th className="w-16 p-4 border-b border-slate-200"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {formData.rates.map((rate, rowIdx) => (
+                                                <tr key={rowIdx} className="hover:bg-white transition-colors border-b border-slate-100 last:border-0 group">
+                                                    {rate.row_data.map((val, colIdx) => (
+                                                        <td key={colIdx} className="p-4">
+                                                            <Input
+                                                                value={val}
+                                                                onChange={e => updateRateData(rowIdx, colIdx, e.target.value)}
+                                                                className="h-11 text-[13px] border-transparent hover:border-slate-200 focus:border-blue-400/50 bg-transparent focus:bg-white transition-all shadow-none rounded-lg font-medium"
+                                                                placeholder="Data entry..."
+                                                            />
+                                                        </td>
+                                                    ))}
+                                                    <td className="p-4 text-center">
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+                                                            onClick={() => removeRateRow(rowIdx)}
+                                                            disabled={formData.rates.length === 1}
+                                                        >
+                                                            <Trash2 className="h-5 w-5" />
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+
+                            {/* Actions Container */}
+                            <div className="flex items-center justify-end gap-4 py-8 px-2">
+                                <Button type="button" variant="ghost" onClick={handleBackToList} disabled={submitting} className="h-12 px-8 rounded-xl text-[12px] font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all">
+                                    Discard Changes
+                                </Button>
+                                <Button type="submit" className="bg-[#0099ff] hover:bg-[#0077cc] h-12 px-12 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]" disabled={submitting}>
+                                    {submitting ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin mr-3" /> COMMITTING...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-5 h-5 mr-3" /> RECONCILE PRODUCT
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
                         </div>
-                    </Card>
+                    </div>
                 </form>
             </div>
         );
     }
 
     return (
-        <div className="space-y-5 animate-in fade-in duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-1">
-                <div className="flex-1 min-w-0">
-                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">{category === 'deposit' ? 'Deposits' : 'Loans'}</h2>
-                    <p className="text-gray-500 mt-1 text-lg">Manage {category === 'deposit' ? 'deposit' : 'loan'} products and interest rates</p>
+        <div className="p-4 lg:p-6 space-y-6 animate-in fade-in duration-500 pb-12">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div className="space-y-1 pl-1">
+                    <h2 className="text-xl font-semibold text-slate-900 leading-tight">
+                        {category === 'deposit' ? 'Deposit' : 'Loan'} Management
+                    </h2>
+                    <p className="text-[13px] font-normal text-gray-500 tracking-wide">
+                        Configure institutional {category} portfolios and rate tiers
+                    </p>
                 </div>
-                <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-[#0077cc] h-12 px-6 rounded-xl font-bold shadow-lg shadow-blue-500/20 gap-2">
-                    <Plus className="h-5 w-5" />
-                    Add {category === 'deposit' ? 'Deposit' : 'Loan'}
+                <Button onClick={handleAdd} className="bg-[#0099ff] hover:bg-[#0077cc] h-9 px-5 rounded-lg font-semibold shadow-none gap-2 text-xs uppercase tracking-wider">
+                    <Plus className="h-4 w-4" />
+                    ADD {category === 'deposit' ? 'DEPOSIT' : 'LOAN'}
                 </Button>
             </div>
 
@@ -548,78 +558,80 @@ export function ProductManagement({ category }: ProductManagementProps) {
                     <p className="text-gray-400 font-medium">Loading products...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {products.length === 0 ? (
-                        <div className="text-center py-32 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Plus className="w-8 h-8 text-gray-400" />
+                        <div className="col-span-full text-center py-20 bg-white rounded-2xl border border-slate-200">
+                            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                                <Plus className="w-6 h-6 text-slate-300" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">No {category}s found</h3>
-                            <p className="text-gray-500 mb-6">Get started by creating your first {category} product.</p>
-                            <Button onClick={handleAdd} variant="outline" className="h-10 border-gray-300">
-                                Create New {category === 'deposit' ? 'Deposit' : 'Loan'}
+                            <h3 className="text-md font-semibold text-slate-900 mb-1">No {category} schemes found</h3>
+                            <p className="text-sm text-slate-400 mb-6">Initialize your first production {category} scheme.</p>
+                            <Button onClick={handleAdd} variant="outline" className="h-9 border-slate-200 text-xs font-semibold uppercase tracking-wider">
+                                NEW {category === 'deposit' ? 'DEPOSIT' : 'LOAN'}
                             </Button>
                         </div>
                     ) : (
                         products.map((product) => (
-                            <Card key={product.id} className="p-6 hover:shadow-2xl transition-all duration-300 border-gray-100 rounded-2xl group bg-white flex flex-col h-full">
+                            <Card key={product.id} className="p-5 border-slate-200 rounded-xl bg-white shadow-none transition-all hover:border-slate-300 group">
                                 <div className="flex flex-col flex-1 min-w-0">
                                     <div className="flex-1">
                                         <div className="flex items-start gap-4 mb-4">
-                                            <div className="p-3 bg-[#0099ff]/10 rounded-2xl group-hover:bg-[#0099ff] transition-colors duration-300 overflow-hidden flex items-center justify-center w-14 h-14 shrink-0">
+                                            <div className="w-12 h-12 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 overflow-hidden group-hover:bg-slate-100 transition-colors">
                                                 {product.image_url ? (
                                                     <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <Layout className="w-8 h-8 text-[#0099ff] group-hover:text-white transition-colors" />
+                                                    <Layout className="w-5 h-5 text-gray-400" />
                                                 )}
                                             </div>
-                                            <div>
-                                                <h3 className="text-2xl font-black text-gray-900 leading-tight">{product.title}</h3>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wide ${product.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                                                        }`}>
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="text-[17px] font-semibold text-blue-400 leading-tight mb-1">{product.title}</h3>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={cn(
+                                                        "px-2 py-1 rounded text-md font-semibold tracking-wider",
+                                                        product.status === 'active' ? 'bg-blue-50 text-blue-500 border border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-200'
+                                                    )}>
                                                         {product.status}
                                                     </span>
-                                                    <span className="text-gray-400 text-xs">•</span>
-                                                    <span className="text-gray-500 text-sm font-medium">{product.category}</span>
+                                                    <span className="text-slate-300 text-sm">•</span>
+                                                    <span className="text-slate-400 text-sm font-semibold tracking-widest">{product.category} Scheme</span>
                                                 </div>
                                             </div>
                                         </div>
-                                        <p className="text-gray-600 text-base mb-6 leading-relaxed max-w-2xl">{product.description}</p>
+                                        <p className="text-slate-500 text-xs mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
 
-                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 p-5 bg-gray-50 rounded-3xl border border-gray-100">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 mb-4 bg-slate-50/50 rounded-xl border border-slate-100">
                                             <div>
-                                                <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                                    <List className="w-3 h-3" /> Key Features
+                                                <h4 className="text-sm text-gray-400 uppercase tracking-[0.08em] mb-4 flex items-center gap-1">
+                                                    <List className="w-3 h-3" /> Scheme Features
                                                 </h4>
-                                                <ul className="space-y-2">
+                                                <ul className="space-y-1">
                                                     {product.features?.slice(0, 3).map((f, i) => (
-                                                        <li key={i} className="text-gray-700 text-sm font-medium flex items-center gap-2">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#0099ff]" /> {f}
+                                                        <li key={i} className="text-slate-600 text-[12px] font-medium flex items-center gap-2">
+                                                            <div className="w-1 h-1 rounded-full bg-blue-500" /> {f}
                                                         </li>
                                                     ))}
                                                     {(product.features?.length || 0) > 3 && (
-                                                        <li className="text-gray-400 text-xs font-medium pl-3.5">+{product.features.length - 3} more features...</li>
+                                                        <li className="text-slate-400 text-[11px] font-medium pl-3">+{product.features.length - 3} further</li>
                                                     )}
                                                 </ul>
                                             </div>
-                                            <div>
-                                                <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                                    <TableIcon className="w-3 h-3" /> Rates Overview
+                                            <div className="sm:border-l border-slate-200 sm:pl-4">
+                                                <h4 className="text-sm text-gray-400 uppercase tracking-[0.08em] mb-4 flex items-center gap-1.5">
+                                                    <Percent className="w-3 h-3" /> Yield Overview
                                                 </h4>
-                                                <p className="text-3xl font-black text-gray-900 tracking-tight text-[#0099ff]">{product.summary_rate}</p>
-                                                <p className="text-xs text-gray-500 font-medium mt-1">
-                                                    {product.rates?.length || 0} configured rate rows
+                                                <p className="text-2xl font-semibold text-slate-900 tracking-tight leading-none mb-1">{product.summary_rate}</p>
+                                                <p className="text-sm text-slate-400 font-medium uppercase tracking-widest">
+                                                    {product.rates?.length || 0} Tier Matrix
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-3 mt-6 pt-6 border-t border-gray-100">
-                                        <Button variant="outline" onClick={() => handleEdit(product)} className="h-11 flex-1 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 font-bold text-gray-700">
+                                    <div className="flex gap-2 mt-5">
+                                        <Button variant="outline" onClick={() => handleEdit(product)} className="h-9 flex-1 rounded-lg border-slate-200 hover:bg-slate-50 font-semibold text-md uppercase tracking-wider text-slate-600 shadow-none">
                                             Edit
                                         </Button>
-                                        <Button variant="ghost" onClick={() => handleDelete(product.id!)} className="h-11 flex-1 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50 font-bold">
+                                        <Button variant="ghost" onClick={() => handleDelete(product.id!)} className="h-9 flex-1 rounded-lg text-slate-400 border-slate-200 bg-blue-50 hover:text-red-600 hover:bg-red-50 font-semibold text-md uppercase tracking-wider">
                                             Delete
                                         </Button>
                                     </div>
@@ -632,3 +644,5 @@ export function ProductManagement({ category }: ProductManagementProps) {
         </div>
     );
 }
+
+export default ProductManagement;

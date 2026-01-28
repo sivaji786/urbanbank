@@ -19,7 +19,8 @@ import {
     Wallet,
     PiggyBank,
     RefreshCw,
-    CircleDollarSign
+    CircleDollarSign,
+    ChevronRight
 } from 'lucide-react';
 import { Button } from './ui/button';
 import client from '../api/client';
@@ -134,54 +135,39 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
     const isLoan = category === 'loan';
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-[104px]">
+        <div className="min-h-screen bg-white">
             {/* Hero Section */}
-            <div className="bg-gradient-to-r from-[#0099ff] to-[#0077cc] text-white py-16 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                <div className="max-w-[1400px] mx-auto px-6 relative z-10">
-                    <div className="flex items-center gap-6">
-                        {/* Back Button */}
-                        <Button
-                            variant="ghost"
-                            size="icon"
+            <div className="bg-blue-50 py-8 lg:py-12 relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-10 relative z-10 flex items-center justify-between">
+                    <div>
+                        <button
                             onClick={handleBack}
-                            className="text-white hover:bg-white/20 rounded-full shrink-0"
+                            className="flex items-center gap-2 text-[#0099ff] hover:text-[#0077cc] transition-colors font-bold text-sm mb-6 group"
                         >
-                            <ArrowLeft className="w-6 h-6" />
-                        </Button>
-
-                        {/* Icon */}
-                        <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm border border-white/10 shrink-0">
-                            <Icon className="w-12 h-12 text-white" />
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            Back to {category === 'deposit' ? 'Deposits' : 'Loans'}
+                        </button>
+                        <div className="flex items-center gap-3 mb-3 font-semibold">
+                            <span className="uppercase tracking-widest text-xs text-gray-500">Product Detail</span>
+                            <ChevronRight className="w-4 h-4 text-gray-300" />
+                            <span className="capitalize text-blue-500">{category}</span>
                         </div>
-
-                        {/* Title and Description */}
-                        <div className="flex-1 min-w-0">
-                            <h1 className="text-3xl lg:text-4xl font-black mb-2 leading-tight">
-                                {product.title}
-                            </h1>
-                            <p className="text-base lg:text-lg text-white/90 font-medium">
-                                {product.description}
-                            </p>
+                        <h1 className="text-2xl lg:text-4xl text-[#0099ff] mb-2 font-semibold">{product.title}</h1>
+                        <p className="text-md text-gray-400 max-w-2xl leading-relaxed">
+                            {product.description}
+                        </p>
+                    </div>
+                    <div className="hidden lg:block">
+                        <div className="w-32 h-32 bg-blue-500 backdrop-blur-md rounded-3xl flex items-center justify-center border border-white/20">
+                            <Icon className="w-16 h-16 text-[#0099ff]" />
                         </div>
-
-                        {/* Interest Rate (for deposits only) */}
-                        {!isLoan && (
-                            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shrink-0">
-                                <TrendingUp className="w-6 h-6" />
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-wider opacity-80">Interest Rate</p>
-                                    <p className="text-2xl font-black">{product.summary_rate}</p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-6 py-12">
+            <div className="max-w-7xl mx-auto px-6 py-6">
                 {/* Image and Key Features Section - Side by Side */}
-                <div className="bg-white rounded-[4rem] p-8 lg:p-12 mb-12 border border-gray-200">
+                <div className="p-8 lg:p-12 mb-12">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                         {/* Left Side - Product Image */}
                         {product.image_url ? (
@@ -200,17 +186,17 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
 
                         {/* Right Side - Key Features */}
                         <div>
-                            <h2 className="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
+                            <h2 className="text-3xl font-black text-gray-900 mb-4 flex items-center gap-3">
                                 <CheckCircle2 className="w-8 h-8 text-[#0099ff]" />
                                 Key Features & Benefits
                             </h2>
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 {product.features.map((feature, idx) => (
-                                    <div key={idx} className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#0099ff]/30 transition-colors group">
-                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-[#0099ff] transition-colors shrink-0">
-                                            <CheckCircle2 className="w-5 h-5 text-[#0099ff] group-hover:text-white" />
+                                    <div key={idx} className="flex items-start gap-4 p-2 bg-gray-50 rounded-2xl border border-gray-100 hover:border-[#0099ff]/30 transition-colors group">
+                                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-[#0099ff] transition-colors shrink-0">
+                                            <CheckCircle2 className="w-4 h-4 text-gray-900 group-hover:text-[#0099ff]" />
                                         </div>
-                                        <p className="text-gray-700 font-bold text-base leading-relaxed">{feature}</p>
+                                        <p className="text-gray-700 font-semibold text-base leading-relaxed">{feature}</p>
                                     </div>
                                 ))}
                             </div>
@@ -220,7 +206,7 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
 
                 {/* Interest Rate Table */}
                 {product.rates && product.rates.length > 0 && !isLoan && (
-                    <div className="bg-white rounded-[5rem] border border-gray-200 overflow-hidden mb-12 animate-in slide-in-from-bottom-8 duration-700">
+                    <div className="bg-white rounded-[3rem] border border-gray-100 overflow-hidden mb-12 animate-in slide-in-from-bottom-8 duration-700 shadow-sm">
                         <div className="flex flex-col">
                             <div className={`${isLoan ? 'bg-gray-900' : 'bg-gradient-to-br from-[#0099ff] to-[#0077cc]'} p-12 lg:p-16 text-white relative`}>
                                 <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -265,8 +251,8 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-8 lg:p-16 bg-white">
-                                <div className="overflow-x-auto rounded-[3rem] border border-gray-200 mb-4">
+                            <div className="p-8 lg:p-12 bg-white">
+                                <div className="overflow-x-auto rounded-[2rem] border border-gray-100 mb-4 shadow-inner">
                                     <table className="w-full min-w-[500px] border-collapse">
                                         <thead>
                                             <tr className="bg-gray-50/50">
@@ -316,9 +302,9 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                 )}
 
                 {/* CTA Section */}
-                <div className="bg-[#0099ff]/10 rounded-[5rem] p-12 md:p-16 text-white text-center border border-gray-200">
-                    <h2 className="text-3xl text-[#0099ff] md:text-4xl font-black mb-4">Ready to Get Started?</h2>
-                    <p className="text-xl text-gray-900 mb-8 max-w-2xl mx-auto">
+                <div className="bg-[#0099ff]/5 rounded-[3rem] p-8 md:p-12 text-white text-center border border-[#0099ff]/10">
+                    <h2 className="text-2xl text-[#0099ff] md:text-4xl font-semibold mb-2">Ready to Get Started?</h2>
+                    <p className="text-md text-gray-900 mb-4 max-w-2xl mx-auto">
                         {isLoan
                             ? 'Apply now and our loan experts will contact you within 24 hours to guide you through the process.'
                             : 'Open your account today and start earning competitive interest on your savings.'}
@@ -333,7 +319,7 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                         <Button
                             onClick={handleBack}
                             variant="outline"
-                            className="border-white/30 text-gray-900 hover:bg-white/10 h-10 px-4 rounded-3xl font-black text-md"
+                            className="border text-gray-900 hover:bg-white/10 h-10 px-4 rounded-3xl font-black text-md"
                         >
                             <ArrowLeft className="w-5 h-5 mr-2" />
                             View All {isLoan ? 'Loans' : 'Deposits'}
@@ -341,6 +327,6 @@ export function ProductDetailPage({ id, category }: ProductDetailPageProps) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

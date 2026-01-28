@@ -26,12 +26,17 @@ $routes->post('products/(:num)', 'ProductController::update/$1'); // Handle POST
 $routes->resource('branches', ['controller' => 'BranchesController']);
 $routes->resource('services', ['controller' => 'ServicesController']);
 $routes->resource('service-charges', ['controller' => 'ServiceChargesController']);
+$routes->resource('gold-rates', ['controller' => 'GoldRatesController']);
+$routes->resource('quick-access', ['controller' => 'QuickAccessController']);
+$routes->resource('service-icons', ['controller' => 'ServiceIconController']);
+$routes->post('service-icons/(:num)', 'ServiceIconController::update/$1');
 
 // Visitor tracking routes
 $routes->post('track-visit', 'VisitorController::trackVisit');
 $routes->get('visitor-stats', 'VisitorController::getStats');
 $routes->get('visitor-logs', 'VisitorController::getLogs');
 $routes->get('visitor-daily-stats', 'VisitorController::getDailyStats');
+$routes->post('admin/block-ip', 'VisitorController::blockIP');
 
 // Upload routes
 $routes->get('uploads', 'UploadsController::index');

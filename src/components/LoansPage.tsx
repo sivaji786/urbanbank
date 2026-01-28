@@ -201,7 +201,7 @@ export function LoansPage() {
   if (view === 'apply' && selectedProduct) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-6 py-8">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-[#d4e8f6] px-8 py-4 text-[#0099ff] relative border-b border-gray-100">
               <Button
@@ -372,18 +372,18 @@ export function LoansPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-16">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <h1 className="text-4xl lg:text-5xl mb-4 font-bold">Loans & Advances</h1>
-          <p className="text-xl text-white/90 max-w-3xl">
+      <div className="bg-gradient-to-br from-[#0099ff] to-[#0077cc] text-white py-12 lg:py-16 relative overflow-hidden shadow-lg border-b border-blue-400/20">
+        <div className="max-w-7xl mx-auto px-10 relative z-10">
+          <h1 className="text-3xl lg:text-4xl mb-4 font-bold">Loans & Advances</h1>
+          <p className="text-md text-white/90 max-w-3xl">
             Turn your dreams into reality with our attractive loan schemes and simplified documentation process.
           </p>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Loan Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {products.map((loan) => {
             const Icon = iconMap[loan.icon] || Briefcase;
             return (
@@ -391,10 +391,10 @@ export function LoansPage() {
                 key={loan.id}
                 className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#0099ff]/30 group"
               >
-                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block mb-6 group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300 overflow-hidden w-16 h-16 shrink-0 flex items-center justify-center">
+                <div className="p-4 bg-[#0099ff]/10 rounded-xl inline-block group-hover:bg-[#0099ff] group-hover:text-gray transition-colors duration-300 overflow-hidden w-16 h-16 shrink-0 flex items-center justify-center">
                   <Icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{loan.title}</h3>
+                <h3 className="text-2xl font-semibold text-[#0099ff] mb-2">{loan.title}</h3>
 
                 {/* Product Image after title */}
                 {loan.image_url && (
@@ -407,9 +407,9 @@ export function LoansPage() {
                   </div>
                 )}
 
-                <p className="text-gray-600 mb-6 line-clamp-3 text-sm leading-relaxed h-[4.5rem]">{loan.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed h-[4.5rem]">{loan.description}</p>
 
-                <ul className="space-y-3 mb-8 h-40 overflow-hidden">
+                <ul className="space-y-2 h-40 overflow-hidden">
                   {loan.features.slice(0, 4).map((feature, featureIdx) => (
                     <li key={featureIdx} className="flex items-start gap-3 text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-5 h-5 text-[#0099ff] shrink-0" />
