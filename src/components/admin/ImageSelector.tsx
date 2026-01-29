@@ -44,7 +44,7 @@ export function ImageSelector({ onSelect, onCancel, multiple = false }: ImageSel
     const fetchFiles = async (path: string) => {
         setIsLoading(true);
         try {
-            const response = await client.get(`uploads`, {
+            const response = await client.get(`media`, {
                 params: { path }
             });
             setFiles(response.data);
@@ -91,7 +91,7 @@ export function ImageSelector({ onSelect, onCancel, multiple = false }: ImageSel
         formData.append('path', currentPath);
 
         try {
-            await client.post('uploads', formData, {
+            await client.post('media', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -113,7 +113,7 @@ export function ImageSelector({ onSelect, onCancel, multiple = false }: ImageSel
         if (!newFolderName) return;
 
         try {
-            await client.post('uploads/create-folder', {
+            await client.post('media/create-folder', {
                 path: currentPath,
                 name: newFolderName
             });

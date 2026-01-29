@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
-import client, { API_BASE_URL } from '../../api/client';
+import client, { getFullUrl } from '../../api/client';
 import { ImageSelector } from './ImageSelector';
 
 interface GalleryImage {
@@ -131,11 +131,7 @@ export function GalleryManagement() {
     setFormData({ ...formData, images: newImages });
   };
 
-  const getImageUrl = (url: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${new URL(API_BASE_URL).origin}/${url}`;
-  };
+  const getImageUrl = (url: string) => getFullUrl(url);
 
   const filteredGalleries = galleries.filter((gallery) =>
     gallery.title.toLowerCase().includes(searchQuery.toLowerCase())

@@ -13,7 +13,7 @@ import {
 } from "../ui/table";
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import client, { API_BASE_URL } from '../../api/client';
+import client, { getFullUrl } from '../../api/client';
 import { ImageSelector } from './ImageSelector';
 import { Switch } from '../ui/switch';
 import { toast } from 'sonner';
@@ -128,9 +128,10 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
         )
     );
 
-    const handleImageSelect = (url: string) => {
+    const handleImageSelect = (url: string | string[]) => {
         if (currentImageField) {
-            setFormData({ ...formData, [currentImageField]: url });
+            const finalUrl = Array.isArray(url) ? url[0] : url;
+            setFormData({ ...formData, [currentImageField]: finalUrl });
         }
         setView('form');
         setCurrentImageField(null);
@@ -182,11 +183,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                                             <div className="aspect-[3/4] w-full bg-[#F8FAFC] relative overflow-hidden">
                                                 {columns.find(col => col.type === 'image') && (
                                                     <img
-                                                        src={(() => {
-                                                            const imgCol = columns.find(col => col.type === 'image');
-                                                            const val = item[imgCol!.key];
-                                                            return val?.startsWith('http') ? val : `${new URL(API_BASE_URL).origin}/${val}`;
-                                                        })()}
+                                                        src={getFullUrl(item[columns.find(col => col.type === 'image')!.key])}
                                                         alt={item.name || 'Item'}
                                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     />
@@ -258,10 +255,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                                                             {col.type === 'image' ? (
                                                                 <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#F8FAFC] border border-[#F1F5F9] group-hover:scale-105 transition-transform duration-500 shadow-sm">
                                                                     <img
-                                                                        src={item[col.key]?.startsWith('http')
-                                                                            ? item[col.key]
-                                                                            : `${new URL(API_BASE_URL).origin}/${item[col.key]}`
-                                                                        }
+                                                                        src={getFullUrl(item[col.key])}
                                                                         alt="Thumbnail"
                                                                         className="w-full h-full object-cover"
                                                                     />
@@ -426,7 +420,7 @@ export function ContentManager({ title, resource, columns, fields, layout = 'lis
                                             <Switch
                                                 id={field.key}
                                                 checked={formData[field.key] === '1' || formData[field.key] === 1 || formData[field.key] === true}
-                                                onCheckedChange={(checked) =>
+                                                onCheckedChange={(checked: boolean) =>
                                                     setFormData({ ...formData, [field.key]: checked ? '1' : '0' })
                                                 }
                                             />

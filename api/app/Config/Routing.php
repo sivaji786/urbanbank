@@ -136,5 +136,10 @@ class Routing extends BaseRouting
      *
      * Default: false
      */
-    public bool $translateUriToCamelCase = true;
+    /**
+     * Whether to use HTTP Method Spoofing.
+     *
+     * @see https://codeigniter4.github.io/userguide/incoming/incomingrequest.html#method-spoofing
+     */
+    public bool $overrideHttpMethod = true;
 }

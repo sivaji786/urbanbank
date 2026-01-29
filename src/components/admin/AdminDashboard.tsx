@@ -25,7 +25,8 @@ import {
   Activity,
   History,
   ShieldCheck,
-  Coins
+  Coins,
+  User
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,6 +39,7 @@ import { GalleryManagement } from './GalleryManagement';
 import DeafAccountsManagement from './DeafAccountsManagement';
 import { ProductManagement } from './ProductManagement';
 import { GoldRatesManagement } from './GoldRatesManagement';
+import { ProfileManagement } from './ProfileManagement';
 
 import { BranchManagement } from './BranchManagement';
 import { ServicesManagement } from './ServicesManagement';
@@ -47,7 +49,7 @@ import { ApplicationManagement } from '../ApplicationManagement';
 import { ApplicationDetails } from '../ApplicationDetails';
 import client from '../../api/client';
 
-type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans' | 'services' | 'service-charges' | 'visitor-analytics' | 'applications' | 'gold-rates' | 'quick-access' | 'service-icons';
+type AdminView = 'overview' | 'gallery' | 'news' | 'events' | 'downloads' | 'reports' | 'settings' | 'pages' | 'team-members' | 'deaf-accounts' | 'branches' | 'deposits' | 'loans' | 'services' | 'service-charges' | 'visitor-analytics' | 'applications' | 'gold-rates' | 'quick-access' | 'service-icons' | 'profile';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -162,6 +164,16 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
           >
             <ExternalLink className="h-3 w-3" />
             Site
+          </button>
+          <button
+            onClick={() => {
+              setCurrentView('profile');
+              window.location.hash = '#admin/profile';
+            }}
+            className="flex items-center gap-2 px-3 py-1 rounded-[6px] bg-white/10 text-white text-xs font-bold uppercase tracking-widest hover:bg-white/20 transition-all duration-300 border border-white/20"
+          >
+            <User className="h-3 w-3" />
+            Profile
           </button>
           <button
             onClick={handleLogout}
@@ -484,6 +496,7 @@ export function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     ]}
                   />
                 )}
+                {currentView === 'profile' && <ProfileManagement />}
               </div>
             </div>
           )}

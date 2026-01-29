@@ -10,8 +10,9 @@ export const getFullUrl = (path: string | null | undefined) => {
 
     // If it's already an absolute URL
     if (sPath.startsWith('http')) {
-        // If it points to our backend, convert it to a relative path to use the proxy
-        if (sPath.includes(API_ROOT)) {
+        // In development, we might want to strip the origin to use Vite's proxy
+        // But in production, we should keep the absolute URL to ensure it points to the correct backend
+        if (import.meta.env.DEV && sPath.includes(API_ROOT)) {
             const relativePart = sPath.split(API_ROOT)[1].replace(/^\/+/, '');
             return `/${relativePart}`;
         }
@@ -23,8 +24,19 @@ export const getFullUrl = (path: string | null | undefined) => {
     // Clean leading slashes
     const cleanPath = sPath.replace(/^\/+/, '');
 
-    // If it's a relative path that doesn't start with uploads/ or assets/, 
-    // it's likely a document upload missing the prefix
+    // If it's a relative path, we need to decide where it points.
+    // In production, most assets are served from the API.
+    if (!import.meta.env.DEV) {
+        // For production, it's safer to return an absolute URL pointing to the API root
+        // If it already starts with uploads/ or assets/, just prepend API_ROOT
+        if (cleanPath.startsWith('uploads/') || cleanPath.startsWith('assets/')) {
+            return `${API_ROOT}/${cleanPath}`;
+        }
+        // Otherwise, assume it's an upload
+        return `${API_ROOT}/uploads/${cleanPath}`;
+    }
+
+    // Development behavior (original)
     if (!cleanPath.startsWith('uploads/') && !cleanPath.startsWith('assets/')) {
         return `/uploads/${cleanPath}`;
     }
@@ -44,6 +56,26 @@ client.interceptors.request.use((config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // HTTP Method Spoofing for production compatibility (avoiding 403 on PUT/DELETE)
+    if (config.method && ['put', 'patch', 'delete'].includes(config.method.toLowerCase())) {
+        const method = config.method.toUpperCase();
+
+        // Add _method to query params for extra compatibility with some WAFs/Servers
+        config.params = { ...config.params, _method: method };
+
+        // If it's a JSON request, add _method to the data
+        if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
+            config.data = { ...config.data, _method: method };
+        } else if (config.data instanceof FormData) {
+            config.data.append('_method', method);
+        } else if (!config.data) {
+            config.data = { _method: method };
+        }
+
+        config.method = 'post';
+    }
+
     return config;
 });
 
